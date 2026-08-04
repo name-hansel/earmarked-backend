@@ -1,0 +1,14 @@
+spring:
+  profiles:
+    active: local
+  application:
+    name: authentication
+  datasource:
+    url: jdbc:postgresql://localhost:${authentication.db.port}/${authentication.db.name}
+    username: ${authentication.db.username}
+    password: ${authentication.db.password}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true

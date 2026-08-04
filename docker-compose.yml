@@ -1,0 +1,17 @@
+services:
+  authentication-db:
+    image: postgres:17
+    container_name: authentication-db
+
+    environment:
+      POSTGRES_DB: ${AUTHENTICATION_DB}
+      POSTGRES_USER: ${AUTHENTICATION_DB_USERNAME}
+      POSTGRES_PASSWORD: ${AUTHENTICATION_DB_PASSWORD}
+    ports:
+      - "${AUTHENTICATION_DB_PORT}:5432"
+
+    volumes:
+      - authentication-db-data:/var/lib/postgresql/data
+
+volumes:
+  authentication-db-data:
