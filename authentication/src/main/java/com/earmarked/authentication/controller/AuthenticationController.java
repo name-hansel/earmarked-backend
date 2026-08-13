@@ -1,5 +1,6 @@
 package com.earmarked.authentication.controller;
 
+import com.earmarked.authentication.config.ApiPaths;
 import com.earmarked.authentication.dto.RegisterRequest;
 import com.earmarked.authentication.dto.RegisterResponse;
 import com.earmarked.authentication.service.AuthenticationService;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/api/auth")
+@RequestMapping(path = ApiPaths.AUTH)
 @RestController
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
@@ -19,7 +20,7 @@ public class AuthenticationController {
         this.authenticationService = authenticationService;
     }
 
-    @PostMapping("/register")
+    @PostMapping(ApiPaths.REGISTER)
     public ResponseEntity<RegisterResponse> registerUser(@RequestBody @Valid RegisterRequest registerRequest) {
         authenticationService.registerUser(registerRequest);
         return ResponseEntity.ok(new RegisterResponse("User registered successfully"));
