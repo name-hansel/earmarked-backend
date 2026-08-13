@@ -23,7 +23,8 @@ public class AuthenticationController {
     @PostMapping(ApiPaths.REGISTER)
     public ResponseEntity<RegisterResponse> registerUser(@RequestBody @Valid RegisterRequest registerRequest) {
         authenticationService.registerUser(registerRequest);
-        return ResponseEntity.ok(new RegisterResponse("User registered successfully"));
+        return ResponseEntity.ok(
+                new RegisterResponse("Account created successfully. Please check your inbox for verification."));
     }
 
 }
