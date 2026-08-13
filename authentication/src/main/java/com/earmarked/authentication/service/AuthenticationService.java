@@ -35,7 +35,5 @@ public class AuthenticationService {
         if (userRepository.existsByUsername(username)) {
             throw new DuplicateUsernameException();
         }
-
-        String password = registerRequest.password();
     }
 }

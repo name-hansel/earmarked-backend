@@ -4,6 +4,6 @@ import org.springframework.http.HttpStatus;
 
 public class DuplicateUsernameException extends ApiException {
     public DuplicateUsernameException() {
-        super("Username already exists.", HttpStatus.BAD_REQUEST);
+        super("DUPLICATE_USERNAME", "Username already exists.", HttpStatus.BAD_REQUEST);
     }
 }
