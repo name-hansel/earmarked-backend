@@ -3,6 +3,7 @@ package com.earmarked.authentication.controller;
 import com.earmarked.authentication.dto.RegisterRequest;
 import com.earmarked.authentication.dto.RegisterResponse;
 import com.earmarked.authentication.service.AuthenticationService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +20,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> registerUser(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<RegisterResponse> registerUser(@RequestBody @Valid RegisterRequest registerRequest) {
         authenticationService.registerUser(registerRequest);
         return ResponseEntity.ok(new RegisterResponse("User registered successfully"));
     }

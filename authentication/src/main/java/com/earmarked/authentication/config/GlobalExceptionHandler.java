@@ -2,6 +2,7 @@ package com.earmarked.authentication.config;
 
 import com.earmarked.authentication.dto.ApiError;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,6 +20,13 @@ public class GlobalExceptionHandler {
                 Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage,
                         (existing, replacement) -> existing));
         ApiError error = new ApiError("VALIDATION_ERROR", "Request validation failed", fieldErrors);
+
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleMessageNotReadable(HttpMessageNotReadableException exception) {
+        ApiError error = new ApiError("INVALID_REQUEST", "Request body is missing or malformed", Map.of());
 
         return ResponseEntity.badRequest().body(error);
     }
