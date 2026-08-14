@@ -12,6 +12,10 @@ spring:
       ddl-auto: validate
   flyway:
     enabled: true
+  data:
+    redis:
+      host: localhost
+      port: ${authentication.redis.port}
 logging:
   level:
     org.springframework.security: DEBUG

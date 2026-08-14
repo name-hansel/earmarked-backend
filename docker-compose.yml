@@ -13,5 +13,16 @@ services:
     volumes:
       - authentication-db-data:/var/lib/postgresql/data
 
+  authentication_redis:
+    image: redis:8
+    container_name: authentication-redis
+
+    ports:
+      - "${AUTHENTICATION_REDIS_PORT}:6379"
+
+    volumes:
+      - authentication-redis-data:/redis
+
 volumes:
   authentication-db-data:
+  authentication-redis-data:
