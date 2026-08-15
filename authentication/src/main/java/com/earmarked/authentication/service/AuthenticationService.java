@@ -5,19 +5,17 @@ import com.earmarked.authentication.entity.UserEntity;
 import com.earmarked.authentication.exception.DuplicateEmailException;
 import com.earmarked.authentication.exception.DuplicateUsernameException;
 import com.earmarked.authentication.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AuthenticationService {
 
+    private final AccountActivationTokenService accountActivationTokenService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public void registerUser(RegisterRequest registerRequest) {
         String email = registerRequest.email().trim();
@@ -44,8 +42,9 @@ public class AuthenticationService {
         user.setUsername(username);
         user.setPasswordHash(passwordEncoder.encode(registerRequest.password()));
 
-        // TODO: Send email
+        UserEntity savedUser = userRepository.save(user);
 
-        userRepository.save(user);
+        String token = accountActivationTokenService.generateAccountActivationToken(savedUser.getId());
+        // TODO: Send email
     }
 }
