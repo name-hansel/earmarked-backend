@@ -2,6 +2,7 @@ package com.earmarked.authentication.config;
 
 import com.earmarked.authentication.dto.ApiError;
 import com.earmarked.authentication.exception.ApiException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -35,5 +36,13 @@ public class GlobalExceptionHandler {
         ApiError error = new ApiError("INVALID_REQUEST", "Request body is missing or malformed", Map.of());
 
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleUnexpectedException(Exception exception) {
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiError("INTERNAL_SERVER_ERROR", "An unexpected error occurred",
+                        Map.of()));
     }
 }
