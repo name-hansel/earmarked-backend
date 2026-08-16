@@ -1,4 +1,4 @@
-package com.earmarked.authentication.dto;
+package com.earmarked.authentication.dto.register;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

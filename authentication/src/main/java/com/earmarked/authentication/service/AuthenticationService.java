@@ -1,6 +1,6 @@
 package com.earmarked.authentication.service;
 
-import com.earmarked.authentication.dto.RegisterRequest;
+import com.earmarked.authentication.dto.register.RegisterRequest;
 import com.earmarked.authentication.entity.UserEntity;
 import com.earmarked.authentication.exception.DuplicateEmailException;
 import com.earmarked.authentication.exception.DuplicateUsernameException;

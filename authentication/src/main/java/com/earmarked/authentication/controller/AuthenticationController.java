@@ -1,8 +1,8 @@
 package com.earmarked.authentication.controller;
 
 import com.earmarked.authentication.config.ApiPaths;
-import com.earmarked.authentication.dto.RegisterRequest;
-import com.earmarked.authentication.dto.RegisterResponse;
+import com.earmarked.authentication.dto.register.RegisterRequest;
+import com.earmarked.authentication.dto.register.RegisterResponse;
 import com.earmarked.authentication.service.AuthenticationService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -27,4 +27,8 @@ public class AuthenticationController {
                 new RegisterResponse("Account created successfully. Please check your inbox for verification."));
     }
 
+    @PostMapping(ApiPaths.ACTIVATE_ACCOUNT)
+    public ResponseEntity<Void> activateAccount() {
+        return ResponseEntity.noContent().build();
+    }
 }
