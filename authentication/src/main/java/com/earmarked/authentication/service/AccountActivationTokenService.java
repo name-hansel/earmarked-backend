@@ -22,7 +22,7 @@ public class AccountActivationTokenService {
 
     public String generateAccountActivationToken(UUID userId) {
         String token = generateSecureToken();
-        String key = KEY_PREFIX + token;
+        String key = getKey(token);
         redisTemplate.opsForValue().set(
                 key,
                 userId.toString(),
@@ -33,7 +33,7 @@ public class AccountActivationTokenService {
     }
 
     public Optional<UUID> validateToken(String token) {
-        String key = KEY_PREFIX + token;
+        String key = getKey(token);
         String userId = redisTemplate.opsForValue().get(key);
 
         if (userId == null) {
@@ -42,6 +42,10 @@ public class AccountActivationTokenService {
 
         redisTemplate.delete(key);
         return Optional.of(UUID.fromString(userId));
+    }
+
+    private String getKey(String token) {
+        return KEY_PREFIX + token;
     }
 
     private String generateSecureToken() {

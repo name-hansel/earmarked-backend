@@ -1,6 +1,7 @@
 package com.earmarked.authentication.controller;
 
 import com.earmarked.authentication.config.ApiPaths;
+import com.earmarked.authentication.dto.activate_account.ActivateAccountRequest;
 import com.earmarked.authentication.dto.register.RegisterRequest;
 import com.earmarked.authentication.dto.register.RegisterResponse;
 import com.earmarked.authentication.service.AuthenticationService;
@@ -28,7 +29,8 @@ public class AuthenticationController {
     }
 
     @PostMapping(ApiPaths.ACTIVATE_ACCOUNT)
-    public ResponseEntity<Void> activateAccount() {
+    public ResponseEntity<Void> activateAccount(@RequestBody ActivateAccountRequest activateAccountRequest) {
+        authenticationService.activateAccount(activateAccountRequest.token());
         return ResponseEntity.noContent().build();
     }
 }
