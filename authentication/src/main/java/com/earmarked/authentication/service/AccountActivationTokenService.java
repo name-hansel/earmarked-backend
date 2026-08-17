@@ -14,38 +14,51 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AccountActivationTokenService {
     private static final Duration TOKEN_TTL = Duration.ofHours(24);
-    private static final String KEY_PREFIX = "account:activation:";
+    private static final String KEY_PREFIX_USER = "account:activation:user:";
+    private static final String KEY_PREFIX_TOKEN = "account:activation:token:";
 
     private final StringRedisTemplate redisTemplate;
 
     private final SecureRandom secureRandom;
 
-    public String generateAccountActivationToken(UUID userId) {
+    public String generateAccountActivationToken(UUID userUuid) {
         String token = generateSecureToken();
-        String key = getKey(token);
-        redisTemplate.opsForValue().set(
-                key,
-                userId.toString(),
-                TOKEN_TTL
-        );
+        addTokenToRedis(userUuid.toString(), token);
 
         return token;
     }
 
     public Optional<UUID> validateToken(String token) {
-        String key = getKey(token);
-        String userId = redisTemplate.opsForValue().get(key);
+        String tokenKey = getTokenKey(token);
+        String userUuid = redisTemplate.opsForValue().get(tokenKey);
 
-        if (userId == null) {
+        if (userUuid == null) {
             return Optional.empty();
         }
 
-        redisTemplate.delete(key);
-        return Optional.of(UUID.fromString(userId));
+        cleanRedisEntries(token, userUuid);
+        return Optional.of(UUID.fromString(userUuid));
     }
 
-    private String getKey(String token) {
-        return KEY_PREFIX + token;
+    private String getUserKey(String userUuid) {
+        return KEY_PREFIX_USER + userUuid;
+    }
+
+    private String getTokenKey(String token) {
+        return KEY_PREFIX_TOKEN + token;
+    }
+
+    private void addTokenToRedis(String userUuid, String token) {
+        String userKey = getUserKey(userUuid);
+        redisTemplate.opsForValue().set(userKey, token, TOKEN_TTL);
+
+        String tokenKey = getTokenKey(token);
+        redisTemplate.opsForValue().set(tokenKey, userUuid, TOKEN_TTL);
+    }
+
+    private void cleanRedisEntries(String token, String userUuid) {
+        redisTemplate.delete(getTokenKey(token));
+        redisTemplate.delete(getUserKey(userUuid));
     }
 
     private String generateSecureToken() {
