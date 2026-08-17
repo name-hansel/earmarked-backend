@@ -22,7 +22,8 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         auth -> auth.requestMatchers(ApiPaths.getPath(ApiPaths.REGISTER),
-                                        ApiPaths.getPath(ApiPaths.ACTIVATE_ACCOUNT)).permitAll()
+                                        ApiPaths.getPath(ApiPaths.ACTIVATE_ACCOUNT), ApiPaths.getPath(ApiPaths.LOGIN))
+                                .permitAll()
                                 .anyRequest()
                                 .authenticated());
 

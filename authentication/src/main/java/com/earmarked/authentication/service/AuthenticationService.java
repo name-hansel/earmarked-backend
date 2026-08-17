@@ -1,11 +1,9 @@
 package com.earmarked.authentication.service;
 
+import com.earmarked.authentication.dto.login.LoginRequest;
 import com.earmarked.authentication.dto.register.RegisterRequest;
 import com.earmarked.authentication.entity.UserEntity;
-import com.earmarked.authentication.exception.DuplicateEmailException;
-import com.earmarked.authentication.exception.DuplicateUsernameException;
-import com.earmarked.authentication.exception.InvalidAccountActivationTokenException;
-import com.earmarked.authentication.exception.UserNotFoundException;
+import com.earmarked.authentication.exception.*;
 import com.earmarked.authentication.repository.UserRepository;
 import com.earmarked.authentication.service.email.EmailService;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +24,12 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public void registerUser(RegisterRequest registerRequest) {
+    public void register(RegisterRequest registerRequest) {
         String email = registerRequest.email().trim();
 
-        if (userRepository.existsByEmail(email)) {
-            UserEntity existingUser = userRepository.findByEmail(email);
+        Optional<UserEntity> existingUserOptional = userRepository.findByEmail(email);
+        if (existingUserOptional.isPresent()) {
+            UserEntity existingUser = existingUserOptional.get();
 
             if (!existingUser.isVerified()) {
                 // Resend activation link
@@ -70,5 +69,19 @@ public class AuthenticationService {
         UserEntity user = userRepository.findById(userUuid.get()).orElseThrow(UserNotFoundException::new);
         user.setVerified(true);
         emailService.sendAccountActivatedEmail(user.getEmail());
+    }
+
+    public void login(LoginRequest loginRequest) {
+        String email = loginRequest.email().trim();
+        Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+
+        if (userOptional.filter(UserEntity::isVerified).isEmpty()) {
+            throw new InvalidLoginException();
+        }
+
+        UserEntity user = userOptional.get();
+        if (!passwordEncoder.matches(loginRequest.password(), user.getPasswordHash())) {
+            throw new InvalidLoginException();
+        }
     }
 }
