@@ -33,7 +33,9 @@ public class AuthenticationService {
             UserEntity existingUser = userRepository.findByEmail(email);
 
             if (!existingUser.isVerified()) {
-                // TODO: Send verification
+                // Resend activation link
+                emailService.sendAccountActivationEmail(email,
+                        accountActivationTokenService.generateAccountActivationToken(existingUser.getId()));
                 throw new DuplicateEmailException(true);
             }
 
