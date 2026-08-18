@@ -35,7 +35,6 @@ public class AuthenticationController {
         return ResponseEntity.noContent().build();
     }
 
-    // FIXME - 403 always
     @PostMapping(ApiPaths.LOGIN)
     public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest loginRequest) {
         authenticationService.login(loginRequest);
