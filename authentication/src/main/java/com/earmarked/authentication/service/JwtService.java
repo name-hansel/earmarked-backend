@@ -44,10 +44,10 @@ public class JwtService {
     private long getExpirationSeconds(JwtConfiguration.TokenType tokenType) {
         switch (tokenType) {
             case ACCESS_TOKEN -> {
-                return jwtProperties.accessTokenExpirationSecond();
+                return jwtProperties.accessTokenExpirationSeconds();
             }
             case REFRESH_TOKEN -> {
-                return jwtProperties.refreshTokenExpirationSecond();
+                return jwtProperties.refreshTokenExpirationSeconds();
             }
             default -> throw new RuntimeException("Unexpected token type: " + tokenType);
         }
