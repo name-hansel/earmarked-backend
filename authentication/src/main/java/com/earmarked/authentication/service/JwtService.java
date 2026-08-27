@@ -4,6 +4,7 @@ import com.earmarked.authentication.config.jwt.JwtConfiguration;
 import com.earmarked.authentication.config.jwt.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,18 +32,19 @@ public class JwtService {
         return generateToken(userUuid, JwtConfiguration.TokenType.REFRESH_TOKEN, refreshTokenUuid);
     }
 
-    public UUID extractUserId(String accessToken) {
-        return UUID.fromString(getClaims(accessToken).getSubject());
-    }
+    public UUID extractUserId(String token) {
+        Claims claims = Jwts.parser().verifyWith(publicKey).build().parseSignedClaims(token).getPayload();
 
-    private Claims getClaims(String token) {
-        return Jwts.parser().verifyWith(publicKey).build().parseSignedClaims(token).getPayload();
+        if (!String.valueOf(JwtConfiguration.TokenType.ACCESS_TOKEN).equals(claims.get(TYPE, String.class))) {
+            throw new JwtException("Token is not an access token");
+        }
+
+        return UUID.fromString(claims.getSubject());
     }
 
     private String generateToken(UUID userId, JwtConfiguration.TokenType tokenType, UUID refreshTokenUuid) {
         Instant now = Instant.now();
-        JwtBuilder builder = Jwts.builder().subject(userId.toString()).claim(TYPE, tokenType)
-                .issuedAt(Date.from(now))
+        JwtBuilder builder = Jwts.builder().subject(userId.toString()).claim(TYPE, tokenType).issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(getExpirationSeconds(tokenType)))).signWith(privateKey);
 
         if (refreshTokenUuid != null) {
