@@ -2,6 +2,7 @@ package com.earmarked.authentication.service;
 
 import com.earmarked.authentication.dto.login.LoginRequest;
 import com.earmarked.authentication.dto.register.RegisterRequest;
+import com.earmarked.authentication.dto.result.AuthenticationResult;
 import com.earmarked.authentication.entity.UserEntity;
 import com.earmarked.authentication.exception.*;
 import com.earmarked.authentication.repository.UserRepository;
@@ -20,6 +21,8 @@ public class AuthenticationService {
 
     private final AccountActivationTokenService accountActivationTokenService;
     private final EmailService emailService;
+    private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -71,7 +74,7 @@ public class AuthenticationService {
         emailService.sendAccountActivatedEmail(user.getEmail());
     }
 
-    public void login(LoginRequest loginRequest) {
+    public AuthenticationResult login(LoginRequest loginRequest) {
         String email = loginRequest.email().trim();
         Optional<UserEntity> userOptional = userRepository.findByEmail(email);
 
@@ -83,5 +86,10 @@ public class AuthenticationService {
         if (!passwordEncoder.matches(loginRequest.password(), user.getPasswordHash())) {
             throw new InvalidLoginException();
         }
+
+        UUID refreshTokenUuid = refreshTokenService.createRefreshToken(user.getId());
+
+        return new AuthenticationResult(jwtService.generateAccessToken(user.getId()),
+                jwtService.generateRefreshToken(user.getId(), refreshTokenUuid));
     }
 }
