@@ -12,10 +12,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RequestMapping(path = ApiPaths.AUTH)
@@ -43,6 +43,12 @@ public class AuthenticationController {
         jwtCookieService.addAccessTokenCookie(authenticationResult.accessToken(), httpServletResponse);
         jwtCookieService.addRefreshTokenCookie(authenticationResult.refreshToken(), httpServletResponse);
 
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(ApiPaths.ME)
+    public ResponseEntity<Void> me(@AuthenticationPrincipal UUID userId) {
+        System.out.println(userId);
         return ResponseEntity.noContent().build();
     }
 }
