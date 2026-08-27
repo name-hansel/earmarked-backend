@@ -1,9 +1,10 @@
 package com.earmarked.authentication.service;
 
+import com.earmarked.authentication.config.jwt.JwtConfiguration;
+import com.earmarked.authentication.config.jwt.JwtProperties;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.interfaces.RSAPrivateKey;
@@ -17,27 +18,17 @@ public class JwtService {
 
     private static final String TYPE = "type";
     private final RSAPrivateKey privateKey;
-
-    @Value("${jwt.access-token-expiration-seconds}")
-    private long accessTokenExpirationSeconds;
-
-    @Value("${jwt.refresh-token-expiration-seconds}")
-    private long refreshTokenExpirationSeconds;
-
-    private enum TokenType {
-        ACCESS_TOKEN,
-        REFRESH_TOKEN
-    }
+    private final JwtProperties jwtProperties;
 
     public String generateAccessToken(UUID userUuid) {
-        return generateToken(userUuid, TokenType.ACCESS_TOKEN, null);
+        return generateToken(userUuid, JwtConfiguration.TokenType.ACCESS_TOKEN, null);
     }
 
     public String generateRefreshToken(UUID userUuid, UUID refreshTokenUuid) {
-        return generateToken(userUuid, TokenType.REFRESH_TOKEN, refreshTokenUuid);
+        return generateToken(userUuid, JwtConfiguration.TokenType.REFRESH_TOKEN, refreshTokenUuid);
     }
 
-    private String generateToken(UUID userId, TokenType tokenType, UUID refreshTokenUuid) {
+    private String generateToken(UUID userId, JwtConfiguration.TokenType tokenType, UUID refreshTokenUuid) {
         Instant now = Instant.now();
         JwtBuilder builder = Jwts.builder().subject(userId.toString()).claim(TYPE, tokenType)
                 .issuedAt(Date.from(now))
@@ -50,13 +41,13 @@ public class JwtService {
         return builder.compact();
     }
 
-    private long getExpirationSeconds(TokenType tokenType) {
+    private long getExpirationSeconds(JwtConfiguration.TokenType tokenType) {
         switch (tokenType) {
             case ACCESS_TOKEN -> {
-                return accessTokenExpirationSeconds;
+                return jwtProperties.accessTokenExpirationSecond();
             }
             case REFRESH_TOKEN -> {
-                return refreshTokenExpirationSeconds;
+                return jwtProperties.refreshTokenExpirationSecond();
             }
             default -> throw new RuntimeException("Unexpected token type: " + tokenType);
         }

@@ -1,4 +1,4 @@
-package com.earmarked.authentication.config;
+package com.earmarked.authentication.config.jwt;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
