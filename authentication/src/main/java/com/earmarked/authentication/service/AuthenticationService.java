@@ -8,6 +8,7 @@ import com.earmarked.authentication.entity.UserEntity;
 import com.earmarked.authentication.exception.*;
 import com.earmarked.authentication.repository.UserRepository;
 import com.earmarked.authentication.service.email.EmailService;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -102,5 +103,20 @@ public class AuthenticationService {
     public void logout(String refreshToken) {
         UUID refreshTokenUuid = jwtService.extractTokenId(refreshToken);
         refreshTokenService.revoke(refreshTokenUuid);
+    }
+
+    public String refresh(String refreshToken) {
+        if (refreshToken == null) {
+            throw new InvalidRefreshTokenException();
+        }
+
+        try {
+            UUID refreshTokenUuid = jwtService.extractTokenId(refreshToken);
+            UUID userId = refreshTokenService.findValidTokenUserId(refreshTokenUuid);
+
+            return jwtService.generateAccessToken(userId);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new InvalidRefreshTokenException();
+        }
     }
 }

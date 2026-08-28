@@ -57,6 +57,16 @@ public class AuthenticationController {
     public ResponseEntity<Void> logout(@CookieValue(name = JwtConfiguration.REFRESH_TOKEN_COOKIE, required = false) String refreshToken, HttpServletResponse response) {
         authenticationService.logout(refreshToken);
         jwtCookieService.clearCookies(response);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(ApiPaths.REFRESH)
+    public ResponseEntity<Void> refresh(@CookieValue(name = JwtConfiguration.REFRESH_TOKEN_COOKIE, required = false) String refreshToken, HttpServletResponse response) {
+        String newAccessToken = authenticationService.refresh(refreshToken);
+        jwtCookieService.addAccessTokenCookie(newAccessToken, response);
+        // TODO - rotate refresh token
+
         return ResponseEntity.noContent().build();
     }
 }

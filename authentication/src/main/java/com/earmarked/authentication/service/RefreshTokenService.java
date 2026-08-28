@@ -2,6 +2,7 @@ package com.earmarked.authentication.service;
 
 import com.earmarked.authentication.config.jwt.JwtProperties;
 import com.earmarked.authentication.entity.RefreshTokenEntity;
+import com.earmarked.authentication.exception.InvalidRefreshTokenException;
 import com.earmarked.authentication.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,5 +29,16 @@ public class RefreshTokenService {
 
     public void revoke(UUID refreshTokenId) {
         refreshTokenRepository.deleteById(refreshTokenId);
+    }
+
+    public UUID findValidTokenUserId(UUID refreshTokenId) {
+        RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findById(refreshTokenId)
+                .orElseThrow(InvalidRefreshTokenException::new);
+
+        if (refreshTokenEntity.getExpiresAt().isBefore(Instant.now())) {
+            throw new InvalidRefreshTokenException();
+        }
+
+        return refreshTokenEntity.getUserId();
     }
 }
