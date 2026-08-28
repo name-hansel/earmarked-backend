@@ -19,19 +19,19 @@ public class JwtCookieService {
 
     public void addAccessTokenCookie(String accessToken, HttpServletResponse response) {
         response.addHeader(HttpHeaders.SET_COOKIE,
-                buildCookie(JwtConfiguration.TokenType.ACCESS_TOKEN, accessToken, "/",
+                buildCookie(JwtConfiguration.TokenType.accessToken(), accessToken, "/",
                         jwtProperties.accessTokenExpirationSeconds()).toString());
     }
 
     public void addRefreshTokenCookie(String refreshToken, HttpServletResponse response) {
         response.addHeader(HttpHeaders.SET_COOKIE,
-                buildCookie(JwtConfiguration.TokenType.REFRESH_TOKEN, refreshToken, ApiPaths.AUTH,
+                buildCookie(JwtConfiguration.TokenType.refreshToken(), refreshToken, ApiPaths.AUTH,
                         jwtProperties.refreshTokenExpirationSeconds()).toString());
     }
 
-    private ResponseCookie buildCookie(JwtConfiguration.TokenType tokenType, String token, String path, long expirationSeconds) {
-        return ResponseCookie.from(String.valueOf(tokenType), token).httpOnly(true)
-                .secure(true).sameSite(String.valueOf(Cookie.SameSite.STRICT)).path(path)
+    private ResponseCookie buildCookie(String tokenType, String token, String path, long expirationSeconds) {
+        return ResponseCookie.from(tokenType, token).httpOnly(true)
+                .secure(true).sameSite(Cookie.SameSite.STRICT.name()).path(path)
                 .maxAge(Duration.ofSeconds(expirationSeconds)).build();
     }
 }

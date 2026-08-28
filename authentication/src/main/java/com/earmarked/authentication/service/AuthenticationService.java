@@ -98,4 +98,9 @@ public class AuthenticationService {
         UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         return new MeResponse(user.getId(), user.getUsername());
     }
+
+    public void logout(String refreshToken) {
+        UUID refreshTokenUuid = jwtService.extractTokenId(refreshToken);
+        refreshTokenService.revoke(refreshTokenUuid);
+    }
 }

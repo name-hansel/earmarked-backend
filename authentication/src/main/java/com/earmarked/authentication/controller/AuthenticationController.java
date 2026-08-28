@@ -1,6 +1,7 @@
 package com.earmarked.authentication.controller;
 
 import com.earmarked.authentication.config.ApiPaths;
+import com.earmarked.authentication.config.jwt.JwtConfiguration;
 import com.earmarked.authentication.dto.activate_account.ActivateAccountRequest;
 import com.earmarked.authentication.dto.login.LoginRequest;
 import com.earmarked.authentication.dto.me.MeResponse;
@@ -50,5 +51,11 @@ public class AuthenticationController {
     @GetMapping(ApiPaths.ME)
     public ResponseEntity<MeResponse> me(@AuthenticationPrincipal UUID userId) {
         return ResponseEntity.ok(authenticationService.getCurrentUser(userId));
+    }
+
+    @PostMapping(ApiPaths.LOGOUT)
+    public ResponseEntity<Void> logout(@CookieValue(name = JwtConfiguration.REFRESH_TOKEN_COOKIE, required = false) String refreshToken) {
+        authenticationService.logout(refreshToken);
+        return ResponseEntity.noContent().build();
     }
 }

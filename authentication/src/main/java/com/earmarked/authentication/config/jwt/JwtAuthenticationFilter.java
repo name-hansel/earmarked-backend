@@ -50,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         return Arrays.stream(request.getCookies())
-                .filter(cookie -> String.valueOf(JwtConfiguration.TokenType.ACCESS_TOKEN).equals(cookie.getName()))
+                .filter(cookie -> JwtConfiguration.TokenType.accessToken().equals(cookie.getName()))
                 .map(Cookie::getValue).findFirst().orElse(null);
     }
 }

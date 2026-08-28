@@ -7,6 +7,7 @@ public final class ApiPaths {
     public static final String ACTIVATE_ACCOUNT = "/activate-account";
     public static final String LOGIN = "/login";
     public static final String ME = "/me";
+    public static final String LOGOUT = "/logout";
 
     public static String getPath(String suffix) {
         return ApiPaths.AUTH + suffix;

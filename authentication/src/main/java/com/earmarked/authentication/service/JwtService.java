@@ -33,13 +33,27 @@ public class JwtService {
     }
 
     public UUID extractUserId(String token) {
-        Claims claims = Jwts.parser().verifyWith(publicKey).build().parseSignedClaims(token).getPayload();
+        Claims claims = getClaims(token);
 
-        if (!String.valueOf(JwtConfiguration.TokenType.ACCESS_TOKEN).equals(claims.get(TYPE, String.class))) {
+        if (!JwtConfiguration.TokenType.accessToken().equals(claims.get(TYPE, String.class))) {
             throw new JwtException("Token is not an access token");
         }
 
         return UUID.fromString(claims.getSubject());
+    }
+
+    public UUID extractTokenId(String token) {
+        Claims claims = getClaims(token);
+
+        if (!JwtConfiguration.TokenType.refreshToken().equals(claims.get(TYPE, String.class))) {
+            throw new JwtException("Token is not a refresh token");
+        }
+
+        return UUID.fromString(claims.getId());
+    }
+
+    private Claims getClaims(String token) {
+        return Jwts.parser().verifyWith(publicKey).build().parseSignedClaims(token).getPayload();
     }
 
     private String generateToken(UUID userId, JwtConfiguration.TokenType tokenType, UUID refreshTokenUuid) {

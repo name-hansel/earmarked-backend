@@ -25,4 +25,8 @@ public class RefreshTokenService {
 
         return savedRefreshToken.getId();
     }
+
+    public void revoke(UUID refreshTokenId) {
+        refreshTokenRepository.deleteById(refreshTokenId);
+    }
 }
