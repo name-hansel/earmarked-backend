@@ -6,6 +6,7 @@ import com.earmarked.authentication.exception.InvalidRefreshTokenException;
 import com.earmarked.authentication.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -40,5 +41,13 @@ public class RefreshTokenService {
         }
 
         return refreshTokenEntity.getUserId();
+    }
+
+    @Transactional
+    public UUID rotate(UUID oldRefreshTokenUuid) {
+        UUID userId = findValidTokenUserId(oldRefreshTokenUuid);
+        revoke(oldRefreshTokenUuid);
+        
+        return createRefreshToken(userId);
     }
 }

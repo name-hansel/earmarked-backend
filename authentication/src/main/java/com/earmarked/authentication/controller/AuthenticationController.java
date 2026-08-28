@@ -7,7 +7,7 @@ import com.earmarked.authentication.dto.login.LoginRequest;
 import com.earmarked.authentication.dto.me.MeResponse;
 import com.earmarked.authentication.dto.register.RegisterRequest;
 import com.earmarked.authentication.dto.register.RegisterResponse;
-import com.earmarked.authentication.dto.result.AuthenticationResult;
+import com.earmarked.authentication.dto.result.TokenPair;
 import com.earmarked.authentication.service.AuthenticationService;
 import com.earmarked.authentication.service.JwtCookieService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,9 +41,9 @@ public class AuthenticationController {
 
     @PostMapping(ApiPaths.LOGIN)
     public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
-        AuthenticationResult authenticationResult = authenticationService.login(loginRequest);
-        jwtCookieService.addAccessTokenCookie(authenticationResult.accessToken(), httpServletResponse);
-        jwtCookieService.addRefreshTokenCookie(authenticationResult.refreshToken(), httpServletResponse);
+        TokenPair tokenPair = authenticationService.login(loginRequest);
+        jwtCookieService.addAccessTokenCookie(tokenPair.accessToken(), httpServletResponse);
+        jwtCookieService.addRefreshTokenCookie(tokenPair.refreshToken(), httpServletResponse);
 
         return ResponseEntity.noContent().build();
     }
@@ -54,18 +54,18 @@ public class AuthenticationController {
     }
 
     @PostMapping(ApiPaths.LOGOUT)
-    public ResponseEntity<Void> logout(@CookieValue(name = JwtConfiguration.REFRESH_TOKEN_COOKIE, required = false) String refreshToken, HttpServletResponse response) {
+    public ResponseEntity<Void> logout(@CookieValue(name = JwtConfiguration.REFRESH_TOKEN_COOKIE, required = false) String refreshToken, HttpServletResponse httpServletResponse) {
         authenticationService.logout(refreshToken);
-        jwtCookieService.clearCookies(response);
+        jwtCookieService.clearCookies(httpServletResponse);
 
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping(ApiPaths.REFRESH)
-    public ResponseEntity<Void> refresh(@CookieValue(name = JwtConfiguration.REFRESH_TOKEN_COOKIE, required = false) String refreshToken, HttpServletResponse response) {
-        String newAccessToken = authenticationService.refresh(refreshToken);
-        jwtCookieService.addAccessTokenCookie(newAccessToken, response);
-        // TODO - rotate refresh token
+    public ResponseEntity<Void> refresh(@CookieValue(name = JwtConfiguration.REFRESH_TOKEN_COOKIE, required = false) String refreshToken, HttpServletResponse httpServletResponse) {
+        TokenPair tokenPair = authenticationService.refresh(refreshToken);
+        jwtCookieService.addAccessTokenCookie(tokenPair.accessToken(), httpServletResponse);
+        jwtCookieService.addRefreshTokenCookie(tokenPair.refreshToken(), httpServletResponse);
 
         return ResponseEntity.noContent().build();
     }

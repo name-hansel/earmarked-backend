@@ -3,7 +3,7 @@ package com.earmarked.authentication.service;
 import com.earmarked.authentication.dto.login.LoginRequest;
 import com.earmarked.authentication.dto.me.MeResponse;
 import com.earmarked.authentication.dto.register.RegisterRequest;
-import com.earmarked.authentication.dto.result.AuthenticationResult;
+import com.earmarked.authentication.dto.result.TokenPair;
 import com.earmarked.authentication.entity.UserEntity;
 import com.earmarked.authentication.exception.*;
 import com.earmarked.authentication.repository.UserRepository;
@@ -76,7 +76,7 @@ public class AuthenticationService {
         emailService.sendAccountActivatedEmail(user.getEmail());
     }
 
-    public AuthenticationResult login(LoginRequest loginRequest) {
+    public TokenPair login(LoginRequest loginRequest) {
         String email = loginRequest.email().trim();
         Optional<UserEntity> userOptional = userRepository.findByEmail(email);
 
@@ -91,7 +91,7 @@ public class AuthenticationService {
 
         UUID refreshTokenUuid = refreshTokenService.createRefreshToken(user.getId());
 
-        return new AuthenticationResult(jwtService.generateAccessToken(user.getId()),
+        return new TokenPair(jwtService.generateAccessToken(user.getId()),
                 jwtService.generateRefreshToken(user.getId(), refreshTokenUuid));
     }
 
@@ -105,16 +105,18 @@ public class AuthenticationService {
         refreshTokenService.revoke(refreshTokenUuid);
     }
 
-    public String refresh(String refreshToken) {
-        if (refreshToken == null) {
+    public TokenPair refresh(String oldRefreshToken) {
+        if (oldRefreshToken == null) {
             throw new InvalidRefreshTokenException();
         }
 
         try {
-            UUID refreshTokenUuid = jwtService.extractTokenId(refreshToken);
-            UUID userId = refreshTokenService.findValidTokenUserId(refreshTokenUuid);
+            UUID oldRefreshTokenUuid = jwtService.extractTokenId(oldRefreshToken);
+            UUID userId = refreshTokenService.findValidTokenUserId(oldRefreshTokenUuid);
+            UUID newRefreshTokenUuid = refreshTokenService.rotate(oldRefreshTokenUuid);
 
-            return jwtService.generateAccessToken(userId);
+            return new TokenPair(jwtService.generateAccessToken(userId),
+                    jwtService.generateRefreshToken(userId, newRefreshTokenUuid));
         } catch (JwtException | IllegalArgumentException e) {
             throw new InvalidRefreshTokenException();
         }
