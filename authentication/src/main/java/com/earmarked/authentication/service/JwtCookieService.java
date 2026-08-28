@@ -16,22 +16,35 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class JwtCookieService {
     private final JwtProperties jwtProperties;
+    private static final String ACCESS_TOKEN_COOKIE_PATH = "/";
+    private static final String REFRESH_TOKEN_COOKIE_PATH = ApiPaths.AUTH;
 
     public void addAccessTokenCookie(String accessToken, HttpServletResponse response) {
         response.addHeader(HttpHeaders.SET_COOKIE,
-                buildCookie(JwtConfiguration.TokenType.accessToken(), accessToken, "/",
+                buildCookie(JwtConfiguration.TokenType.accessToken(), accessToken, ACCESS_TOKEN_COOKIE_PATH,
                         jwtProperties.accessTokenExpirationSeconds()).toString());
     }
 
     public void addRefreshTokenCookie(String refreshToken, HttpServletResponse response) {
         response.addHeader(HttpHeaders.SET_COOKIE,
-                buildCookie(JwtConfiguration.TokenType.refreshToken(), refreshToken, ApiPaths.AUTH,
+                buildCookie(JwtConfiguration.TokenType.refreshToken(), refreshToken, REFRESH_TOKEN_COOKIE_PATH,
                         jwtProperties.refreshTokenExpirationSeconds()).toString());
     }
 
-    private ResponseCookie buildCookie(String tokenType, String token, String path, long expirationSeconds) {
-        return ResponseCookie.from(tokenType, token).httpOnly(true)
-                .secure(true).sameSite(Cookie.SameSite.STRICT.name()).path(path)
-                .maxAge(Duration.ofSeconds(expirationSeconds)).build();
+    public void clearCookies(HttpServletResponse response) {
+        response.addHeader(HttpHeaders.SET_COOKIE,
+                clearCookie(JwtConfiguration.TokenType.accessToken(), ACCESS_TOKEN_COOKIE_PATH).toString());
+        response.addHeader(HttpHeaders.SET_COOKIE,
+                clearCookie(JwtConfiguration.TokenType.refreshToken(), REFRESH_TOKEN_COOKIE_PATH).toString());
+    }
+
+    private ResponseCookie clearCookie(String cookieName, String path) {
+        return buildCookie(cookieName, "", path, 0);
+    }
+
+    private ResponseCookie buildCookie(String cookieName, String token, String path, long expirationSeconds) {
+        return ResponseCookie.from(cookieName, token).httpOnly(true).secure(true)
+                .sameSite(Cookie.SameSite.STRICT.name())
+                .path(path).maxAge(Duration.ofSeconds(expirationSeconds)).build();
     }
 }

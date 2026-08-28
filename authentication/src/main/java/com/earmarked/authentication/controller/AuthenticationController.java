@@ -54,8 +54,9 @@ public class AuthenticationController {
     }
 
     @PostMapping(ApiPaths.LOGOUT)
-    public ResponseEntity<Void> logout(@CookieValue(name = JwtConfiguration.REFRESH_TOKEN_COOKIE, required = false) String refreshToken) {
+    public ResponseEntity<Void> logout(@CookieValue(name = JwtConfiguration.REFRESH_TOKEN_COOKIE, required = false) String refreshToken, HttpServletResponse response) {
         authenticationService.logout(refreshToken);
+        jwtCookieService.clearCookies(response);
         return ResponseEntity.noContent().build();
     }
 }
