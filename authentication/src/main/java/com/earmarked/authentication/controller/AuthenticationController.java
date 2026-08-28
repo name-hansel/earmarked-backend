@@ -3,6 +3,7 @@ package com.earmarked.authentication.controller;
 import com.earmarked.authentication.config.ApiPaths;
 import com.earmarked.authentication.dto.activate_account.ActivateAccountRequest;
 import com.earmarked.authentication.dto.login.LoginRequest;
+import com.earmarked.authentication.dto.me.MeResponse;
 import com.earmarked.authentication.dto.register.RegisterRequest;
 import com.earmarked.authentication.dto.register.RegisterResponse;
 import com.earmarked.authentication.dto.result.AuthenticationResult;
@@ -47,8 +48,7 @@ public class AuthenticationController {
     }
 
     @GetMapping(ApiPaths.ME)
-    public ResponseEntity<Void> me(@AuthenticationPrincipal UUID userId) {
-        System.out.println(userId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<MeResponse> me(@AuthenticationPrincipal UUID userId) {
+        return ResponseEntity.ok(authenticationService.getCurrentUser(userId));
     }
 }

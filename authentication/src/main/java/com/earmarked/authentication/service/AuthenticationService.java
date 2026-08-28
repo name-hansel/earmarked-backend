@@ -1,6 +1,7 @@
 package com.earmarked.authentication.service;
 
 import com.earmarked.authentication.dto.login.LoginRequest;
+import com.earmarked.authentication.dto.me.MeResponse;
 import com.earmarked.authentication.dto.register.RegisterRequest;
 import com.earmarked.authentication.dto.result.AuthenticationResult;
 import com.earmarked.authentication.entity.UserEntity;
@@ -91,5 +92,10 @@ public class AuthenticationService {
 
         return new AuthenticationResult(jwtService.generateAccessToken(user.getId()),
                 jwtService.generateRefreshToken(user.getId(), refreshTokenUuid));
+    }
+
+    public MeResponse getCurrentUser(UUID userId) {
+        UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        return new MeResponse(user.getId(), user.getUsername());
     }
 }
