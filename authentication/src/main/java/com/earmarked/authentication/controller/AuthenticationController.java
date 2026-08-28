@@ -8,6 +8,8 @@ import com.earmarked.authentication.dto.login.LoginRequest;
 import com.earmarked.authentication.dto.me.MeResponse;
 import com.earmarked.authentication.dto.register.RegisterRequest;
 import com.earmarked.authentication.dto.register.RegisterResponse;
+import com.earmarked.authentication.dto.resend_activation.ResendActivationRequest;
+import com.earmarked.authentication.dto.resend_activation.ResendActivationResponse;
 import com.earmarked.authentication.dto.result.TokenPair;
 import com.earmarked.authentication.service.AuthenticationService;
 import com.earmarked.authentication.service.JwtCookieService;
@@ -29,9 +31,7 @@ public class AuthenticationController {
 
     @PostMapping(ApiPaths.REGISTER)
     public ResponseEntity<RegisterResponse> register(@RequestBody @Valid RegisterRequest registerRequest) {
-        authenticationService.register(registerRequest);
-        return ResponseEntity.ok(
-                new RegisterResponse("Account created successfully. Please check your inbox for verification."));
+        return ResponseEntity.ok(authenticationService.register(registerRequest));
     }
 
     @PostMapping(ApiPaths.ACTIVATE_ACCOUNT)
@@ -77,5 +77,10 @@ public class AuthenticationController {
         jwtCookieService.clearCookies(httpServletResponse);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(ApiPaths.RESEND_ACTIVATION)
+    public ResponseEntity<ResendActivationResponse> resendActivation(@Valid @RequestBody ResendActivationRequest resendActivationRequest) {
+        return ResponseEntity.ok(authenticationService.resendActivationEmail(resendActivationRequest.email()));
     }
 }

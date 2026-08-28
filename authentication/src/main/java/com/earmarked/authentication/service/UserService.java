@@ -22,7 +22,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public void createNewUser(String email, String username, String password) {
-        checkForExistingUser(email, username);
+        checkExistingUserForRegistration(email, username);
 
         UserEntity user = new UserEntity();
         user.setEmail(email);
@@ -30,8 +30,7 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(password));
 
         UserEntity savedUser = userRepository.save(user);
-        emailService.sendAccountActivationEmail(savedUser.getEmail(),
-                accountActivationTokenService.generateAccountActivationToken(savedUser.getId()));
+        sendAccountActivationEmail(savedUser);
     }
 
     public void activateAccount(String token) {
@@ -76,15 +75,26 @@ public class UserService {
         userRepository.deleteById(user.getId());
     }
 
-    private void checkForExistingUser(String email, String username) {
+    public void resendActivationEmail(String email) {
+        Optional<UserEntity> unverifiedUserOptional = userRepository.findByEmailAndVerifiedFalse(email);
+
+        if (unverifiedUserOptional.isEmpty()) {
+            return;
+        }
+
+        UserEntity unverifiedUser = unverifiedUserOptional.get();
+        accountActivationTokenService.invalidateExistingToken(unverifiedUser.getId());
+        sendAccountActivationEmail(unverifiedUser);
+    }
+
+    private void checkExistingUserForRegistration(String email, String username) {
         Optional<UserEntity> existingUserOptional = userRepository.findByEmail(email);
         if (existingUserOptional.isPresent()) {
             UserEntity existingUser = existingUserOptional.get();
 
             if (!existingUser.isVerified()) {
                 // Resend activation link
-                emailService.sendAccountActivationEmail(email,
-                        accountActivationTokenService.generateAccountActivationToken(existingUser.getId()));
+                sendAccountActivationEmail(existingUser);
                 throw new DuplicateEmailException(true);
             }
 
@@ -94,5 +104,10 @@ public class UserService {
         if (userRepository.existsByUsername(username)) {
             throw new DuplicateUsernameException();
         }
+    }
+
+    private void sendAccountActivationEmail(UserEntity user) {
+        String accountActivationToken = accountActivationTokenService.generateAccountActivationToken(user.getId());
+        emailService.sendAccountActivationEmail(user.getEmail(), accountActivationToken);
     }
 }

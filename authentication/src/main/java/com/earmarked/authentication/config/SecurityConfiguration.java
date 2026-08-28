@@ -28,7 +28,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(ApiPaths.getPath(ApiPaths.REGISTER),
                                 ApiPaths.getPath(ApiPaths.ACTIVATE_ACCOUNT), ApiPaths.getPath(ApiPaths.LOGIN),
-                                ApiPaths.getPath(ApiPaths.REFRESH))
+                                ApiPaths.getPath(ApiPaths.REFRESH), ApiPaths.getPath(ApiPaths.RESEND_ACTIVATION))
                         .permitAll()
                         .anyRequest().authenticated());
 

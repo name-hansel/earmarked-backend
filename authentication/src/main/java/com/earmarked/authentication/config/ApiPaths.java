@@ -10,6 +10,7 @@ public final class ApiPaths {
     public static final String LOGOUT = "/logout";
     public static final String REFRESH = "/refresh";
     public static final String DELETE_ACCOUNT = "/delete-account";
+    public static final String RESEND_ACTIVATION = "/resend-activation";
 
     public static String getPath(String suffix) {
         return ApiPaths.AUTH + suffix;

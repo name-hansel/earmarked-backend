@@ -18,7 +18,6 @@ public class AccountActivationTokenService {
     private static final String KEY_PREFIX_TOKEN = "account:activation:token:";
 
     private final StringRedisTemplate redisTemplate;
-
     private final SecureRandom secureRandom;
 
     public String generateAccountActivationToken(UUID userUuid) {
@@ -41,6 +40,10 @@ public class AccountActivationTokenService {
 
         cleanRedisEntries(getUserKey(userUuid), tokenKey);
         return Optional.of(UUID.fromString(userUuid));
+    }
+
+    public void invalidateExistingToken(UUID userId) {
+        // TODO - implement
     }
 
     private String getUserKey(String userUuid) {
