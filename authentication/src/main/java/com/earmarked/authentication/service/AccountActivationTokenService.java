@@ -20,12 +20,12 @@ public class AccountActivationTokenService {
     private final StringRedisTemplate redisTemplate;
     private final SecureRandom secureRandom;
 
-    public String generateAccountActivationToken(UUID userUuid) {
+    public String generateAccountActivationToken(UUID userId) {
         // Clear any existing tokens
-        cleanRedisEntries(userUuid.toString());
+        invalidateExistingTokens(userId);
 
         String token = generateSecureToken();
-        addTokenToRedis(userUuid.toString(), token);
+        addTokenToRedis(userId.toString(), token);
 
         return token;
     }
@@ -40,10 +40,6 @@ public class AccountActivationTokenService {
 
         cleanRedisEntries(getUserKey(userUuid), tokenKey);
         return Optional.of(UUID.fromString(userUuid));
-    }
-
-    public void invalidateExistingToken(UUID userId) {
-        // TODO - implement
     }
 
     private String getUserKey(String userUuid) {
@@ -62,8 +58,8 @@ public class AccountActivationTokenService {
         redisTemplate.opsForValue().set(tokenKey, userUuid, TOKEN_TTL);
     }
 
-    private void cleanRedisEntries(String userUuid) {
-        String userKey = getUserKey(userUuid);
+    private void invalidateExistingTokens(UUID userId) {
+        String userKey = getUserKey(userId.toString());
         String token = redisTemplate.opsForValue().get(userKey);
 
         cleanRedisEntries(userKey, getTokenKey(token));

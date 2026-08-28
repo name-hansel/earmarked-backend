@@ -82,9 +82,7 @@ public class UserService {
             return;
         }
 
-        UserEntity unverifiedUser = unverifiedUserOptional.get();
-        accountActivationTokenService.invalidateExistingToken(unverifiedUser.getId());
-        sendAccountActivationEmail(unverifiedUser);
+        sendAccountActivationEmail(unverifiedUserOptional.get());
     }
 
     private void checkExistingUserForRegistration(String email, String username) {
