@@ -3,6 +3,7 @@ package com.earmarked.authentication.controller;
 import com.earmarked.authentication.config.ApiPaths;
 import com.earmarked.authentication.config.jwt.JwtConfiguration;
 import com.earmarked.authentication.dto.activate_account.ActivateAccountRequest;
+import com.earmarked.authentication.dto.delete_account.DeleteAccountRequest;
 import com.earmarked.authentication.dto.login.LoginRequest;
 import com.earmarked.authentication.dto.me.MeResponse;
 import com.earmarked.authentication.dto.register.RegisterRequest;
@@ -66,6 +67,14 @@ public class AuthenticationController {
         TokenPair tokenPair = authenticationService.refresh(refreshToken);
         jwtCookieService.addAccessTokenCookie(tokenPair.accessToken(), httpServletResponse);
         jwtCookieService.addRefreshTokenCookie(tokenPair.refreshToken(), httpServletResponse);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(ApiPaths.DELETE_ACCOUNT)
+    public ResponseEntity<Void> deleteAccount(@Valid @RequestBody DeleteAccountRequest deleteAccountRequest, @AuthenticationPrincipal UUID userId, HttpServletResponse httpServletResponse) {
+        authenticationService.deleteAccount(deleteAccountRequest, userId);
+        jwtCookieService.clearCookies(httpServletResponse);
 
         return ResponseEntity.noContent().build();
     }

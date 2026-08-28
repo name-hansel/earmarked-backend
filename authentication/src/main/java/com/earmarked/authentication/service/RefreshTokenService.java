@@ -47,7 +47,11 @@ public class RefreshTokenService {
     public UUID rotate(UUID oldRefreshTokenUuid) {
         UUID userId = findValidTokenUserId(oldRefreshTokenUuid);
         revoke(oldRefreshTokenUuid);
-        
+
         return createRefreshToken(userId);
+    }
+
+    public void deleteAllForUser(UUID userId) {
+        refreshTokenRepository.deleteAllByUserId(userId);
     }
 }

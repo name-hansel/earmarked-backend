@@ -1,5 +1,6 @@
 package com.earmarked.authentication.service;
 
+import com.earmarked.authentication.dto.delete_account.DeleteAccountRequest;
 import com.earmarked.authentication.dto.login.LoginRequest;
 import com.earmarked.authentication.dto.me.MeResponse;
 import com.earmarked.authentication.dto.register.RegisterRequest;
@@ -120,5 +121,19 @@ public class AuthenticationService {
         } catch (JwtException | IllegalArgumentException e) {
             throw new InvalidRefreshTokenException();
         }
+    }
+
+    @Transactional
+    public void deleteAccount(DeleteAccountRequest deleteAccountRequest, UUID userId) {
+        UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+
+        if (!passwordEncoder.matches(deleteAccountRequest.password(), user.getPasswordHash())) {
+            throw new IncorrectPasswordException();
+        }
+
+        // TODO - delete other related entities
+
+        refreshTokenService.deleteAllForUser(user.getId());
+        userRepository.deleteById(user.getId());
     }
 }
