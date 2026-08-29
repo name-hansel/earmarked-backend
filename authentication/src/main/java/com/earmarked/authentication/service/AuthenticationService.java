@@ -78,7 +78,15 @@ public class AuthenticationService {
         userService.resendActivationEmail(email);
     }
 
+    @Transactional
     public void changePassword(UUID userId, String newPassword, String oldPassword, String refreshToken) {
+        if (refreshToken == null) {
+            throw new InvalidRefreshTokenException();
+        }
+
         userService.changePassword(userId, newPassword, oldPassword);
+
+        UUID refreshTokenId = jwtService.extractTokenId(refreshToken);
+        refreshTokenService.deleteAllExcept(userId, refreshTokenId);
     }
 }

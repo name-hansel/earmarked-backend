@@ -54,4 +54,8 @@ public class RefreshTokenService {
     public void deleteAllForUser(UUID userId) {
         refreshTokenRepository.deleteAllByUserId(userId);
     }
+
+    public void deleteAllExcept(UUID userId, UUID currentTokenId) {
+        refreshTokenRepository.deleteAllExcept(userId, currentTokenId);
+    }
 }
