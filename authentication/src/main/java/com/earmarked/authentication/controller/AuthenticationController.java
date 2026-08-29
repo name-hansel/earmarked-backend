@@ -3,6 +3,8 @@ package com.earmarked.authentication.controller;
 import com.earmarked.authentication.config.ApiPaths;
 import com.earmarked.authentication.config.jwt.JwtConfiguration;
 import com.earmarked.authentication.dto.activate_account.ActivateAccountRequest;
+import com.earmarked.authentication.dto.change_password.ChangePasswordRequest;
+import com.earmarked.authentication.dto.change_password.ChangePasswordResponse;
 import com.earmarked.authentication.dto.delete_account.DeleteAccountRequest;
 import com.earmarked.authentication.dto.login.LoginRequest;
 import com.earmarked.authentication.dto.me.MeResponse;
@@ -31,7 +33,9 @@ public class AuthenticationController {
 
     @PostMapping(ApiPaths.REGISTER)
     public ResponseEntity<RegisterResponse> register(@RequestBody @Valid RegisterRequest registerRequest) {
-        return ResponseEntity.ok(authenticationService.register(registerRequest));
+        authenticationService.register(registerRequest.email(), registerRequest.password(), registerRequest.username());
+        return ResponseEntity.ok(
+                new RegisterResponse("Account created successfully. Please check your inbox for verification."));
     }
 
     @PostMapping(ApiPaths.ACTIVATE_ACCOUNT)
@@ -81,6 +85,14 @@ public class AuthenticationController {
 
     @PostMapping(ApiPaths.RESEND_ACTIVATION)
     public ResponseEntity<ResendActivationResponse> resendActivation(@Valid @RequestBody ResendActivationRequest resendActivationRequest) {
-        return ResponseEntity.ok(authenticationService.resendActivationEmail(resendActivationRequest.email()));
+        authenticationService.resendActivationEmail(resendActivationRequest.email());
+        return ResponseEntity.ok(new ResendActivationResponse(
+                "If an account with this email address exists, an activation link has been sent."));
+    }
+
+    @PatchMapping(ApiPaths.CHANGE_PASSWORD)
+    public ResponseEntity<ChangePasswordResponse> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
+        authenticationService.changePassword(changePasswordRequest.newPassword(), changePasswordRequest.oldPassword());
+        return ResponseEntity.ok(new ChangePasswordResponse("Password changed successfully."));
     }
 }

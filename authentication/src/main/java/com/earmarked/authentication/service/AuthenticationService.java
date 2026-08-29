@@ -3,9 +3,6 @@ package com.earmarked.authentication.service;
 import com.earmarked.authentication.dto.delete_account.DeleteAccountRequest;
 import com.earmarked.authentication.dto.login.LoginRequest;
 import com.earmarked.authentication.dto.me.MeResponse;
-import com.earmarked.authentication.dto.register.RegisterRequest;
-import com.earmarked.authentication.dto.register.RegisterResponse;
-import com.earmarked.authentication.dto.resend_activation.ResendActivationResponse;
 import com.earmarked.authentication.dto.result.TokenPair;
 import com.earmarked.authentication.exception.InvalidRefreshTokenException;
 import io.jsonwebtoken.JwtException;
@@ -23,11 +20,10 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
 
-    public RegisterResponse register(RegisterRequest registerRequest) {
-        String email = registerRequest.email().trim();
-        String username = registerRequest.username().trim();
-        userService.createNewUser(email, username, registerRequest.password());
-        return new RegisterResponse("Account created successfully. Please check your inbox for verification.");
+    public void register(String email, String password, String username) {
+        String trimmedEmail = email.trim();
+        String trimmedUsername = username.trim();
+        userService.createNewUser(trimmedEmail, trimmedUsername, password);
     }
 
     @Transactional
@@ -78,9 +74,10 @@ public class AuthenticationService {
         // TODO - delete other related entities
     }
 
-    public ResendActivationResponse resendActivationEmail(String email) {
+    public void resendActivationEmail(String email) {
         userService.resendActivationEmail(email);
-        return new ResendActivationResponse(
-                "If an account with this email address exists, an activation link has been sent.");
+    }
+
+    public void changePassword(String newPassword, String oldPassword) {
     }
 }
