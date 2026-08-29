@@ -5,6 +5,7 @@ import com.earmarked.authentication.entity.UserEntity;
 import com.earmarked.authentication.exception.*;
 import com.earmarked.authentication.repository.UserRepository;
 import com.earmarked.authentication.service.email.EmailService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -83,6 +84,17 @@ public class UserService {
         }
 
         sendAccountActivationEmail(unverifiedUserOptional.get());
+    }
+
+    @Transactional
+    public void changePassword(UUID userId, String newPassword, String oldPassword) {
+        UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+
+        if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
+            throw new IncorrectPasswordException();
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
     }
 
     private void checkExistingUserForRegistration(String email, String username) {

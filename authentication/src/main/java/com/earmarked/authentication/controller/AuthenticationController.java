@@ -91,8 +91,10 @@ public class AuthenticationController {
     }
 
     @PatchMapping(ApiPaths.CHANGE_PASSWORD)
-    public ResponseEntity<ChangePasswordResponse> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
-        authenticationService.changePassword(changePasswordRequest.newPassword(), changePasswordRequest.oldPassword());
+    public ResponseEntity<ChangePasswordResponse> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest, @AuthenticationPrincipal UUID userId, @CookieValue(name = JwtConfiguration.REFRESH_TOKEN_COOKIE, required = false) String refreshToken) {
+        authenticationService.changePassword(userId, changePasswordRequest.newPassword(),
+                changePasswordRequest.oldPassword(), refreshToken);
+
         return ResponseEntity.ok(new ChangePasswordResponse("Password changed successfully."));
     }
 }

@@ -78,6 +78,7 @@ public class AuthenticationService {
         userService.resendActivationEmail(email);
     }
 
-    public void changePassword(String newPassword, String oldPassword) {
+    public void changePassword(UUID userId, String newPassword, String oldPassword, String refreshToken) {
+        userService.changePassword(userId, newPassword, oldPassword);
     }
 }
