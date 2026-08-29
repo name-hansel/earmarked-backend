@@ -6,6 +6,8 @@ import com.earmarked.authentication.dto.activate_account.ActivateAccountRequest;
 import com.earmarked.authentication.dto.change_password.ChangePasswordRequest;
 import com.earmarked.authentication.dto.change_password.ChangePasswordResponse;
 import com.earmarked.authentication.dto.delete_account.DeleteAccountRequest;
+import com.earmarked.authentication.dto.forgot_password.ForgotPasswordRequest;
+import com.earmarked.authentication.dto.forgot_password.ForgotPasswordResponse;
 import com.earmarked.authentication.dto.login.LoginRequest;
 import com.earmarked.authentication.dto.me.MeResponse;
 import com.earmarked.authentication.dto.register.RegisterRequest;
@@ -96,5 +98,11 @@ public class AuthenticationController {
                 changePasswordRequest.oldPassword(), refreshToken);
 
         return ResponseEntity.ok(new ChangePasswordResponse("Password changed successfully."));
+    }
+
+    @PostMapping(ApiPaths.FORGOT_PASSWORD)
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+        return ResponseEntity.accepted().body(new ForgotPasswordResponse(
+                "If an account with this email address exists, a password reset link has been sent."));
     }
 }
