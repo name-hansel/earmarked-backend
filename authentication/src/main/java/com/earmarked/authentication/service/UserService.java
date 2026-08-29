@@ -92,6 +92,10 @@ public class UserService {
             throw new IncorrectPasswordException();
         }
 
+        if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+            throw new PasswordSameAsCurrentException();
+        }
+
         user.setPasswordHash(passwordEncoder.encode(newPassword));
     }
 
