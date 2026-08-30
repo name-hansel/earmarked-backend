@@ -15,6 +15,8 @@ import com.earmarked.authentication.dto.register.RegisterRequest;
 import com.earmarked.authentication.dto.register.RegisterResponse;
 import com.earmarked.authentication.dto.resend_activation.ResendActivationRequest;
 import com.earmarked.authentication.dto.resend_activation.ResendActivationResponse;
+import com.earmarked.authentication.dto.reset_password.ResetPasswordRequest;
+import com.earmarked.authentication.dto.reset_password.ResetPasswordResponse;
 import com.earmarked.authentication.dto.result.TokenPair;
 import com.earmarked.authentication.service.AuthenticationService;
 import com.earmarked.authentication.service.JwtCookieService;
@@ -108,5 +110,10 @@ public class AuthenticationController {
 
         return ResponseEntity.accepted().body(new ForgotPasswordResponse(
                 "If an account with this email address exists, a password reset link has been sent."));
+    }
+
+    @PostMapping(ApiPaths.RESET_PASSWORD)
+    public ResponseEntity<ResetPasswordResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
+        return ResponseEntity.ok(new ResetPasswordResponse("Password reset successfully."));
     }
 }

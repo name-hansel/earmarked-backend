@@ -25,13 +25,11 @@ public class SecurityConfiguration {
     SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(ApiPaths.getPath(ApiPaths.REGISTER),
+                .authorizeHttpRequests(auth -> auth.requestMatchers(ApiPaths.getPath(ApiPaths.REGISTER),
                                 ApiPaths.getPath(ApiPaths.ACTIVATE_ACCOUNT), ApiPaths.getPath(ApiPaths.LOGIN),
                                 ApiPaths.getPath(ApiPaths.REFRESH), ApiPaths.getPath(ApiPaths.RESEND_ACTIVATION),
-                                ApiPaths.getPath(ApiPaths.FORGOT_PASSWORD))
-                        .permitAll()
-                        .anyRequest().authenticated());
+                                ApiPaths.getPath(ApiPaths.FORGOT_PASSWORD), ApiPaths.getPath(ApiPaths.RESET_PASSWORD))
+                        .permitAll().anyRequest().authenticated());
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
