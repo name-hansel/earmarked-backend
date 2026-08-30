@@ -112,8 +112,15 @@ public class AuthenticationService {
 
         if (user != null) {
             String passwordResetToken = passwordResetTokenService.generatePasswordResetToken(user.userId());
-            emailService.sendPasswordResetEmail(user.email(), passwordResetToken);
+            emailService.sendForgotPasswordEmail(user.email(), passwordResetToken);
         }
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        UserDTO user = userService.resetPassword(token, newPassword);
+        refreshTokenService.deleteAllForUser(user.userId());
+        emailService.sendResetPasswordEmail(user.email());
     }
 
     private void sendAccountActivationEmail(UserDTO user) {

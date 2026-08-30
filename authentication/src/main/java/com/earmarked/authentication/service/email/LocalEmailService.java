@@ -30,11 +30,19 @@ public class LocalEmailService implements EmailService {
     }
 
     @Override
-    public void sendPasswordResetEmail(String email, String token) {
+    public void sendForgotPasswordEmail(String email, String token) {
         log.info("""
-                Password reset email
+                Forgot password email
                 To: {}
                 Password reset URL: {}
                 """, email, LOCAL_FRONTEND_URL_RESET_PASSWORD + token);
+    }
+
+    @Override
+    public void sendResetPasswordEmail(String email) {
+        log.info("""
+                Password reset successfully email
+                To: {}
+                """, email);
     }
 }

@@ -15,16 +15,6 @@ public abstract class TokenService {
     private final SecureRandom secureRandom;
     private final StringRedisTemplate redisTemplate;
 
-    protected String generateToken(UUID userId) {
-        // Remove existing entries for user
-        invalidateExistingTokens(userId);
-
-        String token = generateSecureToken();
-        addTokenToRedis(userId, token);
-
-        return token;
-    }
-
     public Optional<UUID> consumeToken(String token) {
         TokenConfiguration tokenConfiguration = getTokenConfiguration();
 
@@ -39,6 +29,22 @@ public abstract class TokenService {
         redisTemplate.delete(getUserKey(tokenConfiguration, userId));
 
         return Optional.of(userId);
+    }
+
+    public UUID getUserId(String token) {
+        String tokenKey = getTokenKey(getTokenConfiguration(), token);
+
+        return Optional.ofNullable(redisTemplate.opsForValue().get(tokenKey)).map(UUID::fromString).orElse(null);
+    }
+
+    protected String generateToken(UUID userId) {
+        // Remove existing entries for user
+        invalidateExistingTokens(userId);
+
+        String token = generateSecureToken();
+        addTokenToRedis(userId, token);
+
+        return token;
     }
 
     protected abstract TokenConfiguration getTokenConfiguration();

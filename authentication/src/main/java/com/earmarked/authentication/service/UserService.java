@@ -5,6 +5,7 @@ import com.earmarked.authentication.entity.UserEntity;
 import com.earmarked.authentication.exception.*;
 import com.earmarked.authentication.repository.UserRepository;
 import com.earmarked.authentication.service.token.AccountActivationTokenService;
+import com.earmarked.authentication.service.token.PasswordResetTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final AccountActivationTokenService accountActivationTokenService;
+    private final PasswordResetTokenService passwordResetTokenService;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -61,7 +63,7 @@ public class UserService {
 
     public UserDTO getUser(UUID userId) {
         UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        
+
         return transform(user);
     }
 
@@ -99,6 +101,25 @@ public class UserService {
         Optional<UserEntity> userOptional = userRepository.findByEmailAndVerified(email, true);
 
         return userOptional.map(this::transform).orElse(null);
+    }
+
+    public UserDTO resetPassword(String token, String newPassword) {
+        UUID userId = passwordResetTokenService.getUserId(token);
+
+        if (userId == null) {
+            throw new InvalidResetPasswordTokenException();
+        }
+
+        UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+
+        if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+            throw new PasswordSameAsCurrentException();
+        }
+
+        passwordResetTokenService.consumeToken(token).orElseThrow(InvalidResetPasswordTokenException::new);
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+
+        return transform(user);
     }
 
     private void checkExistingUserForRegistration(String email, String username) {

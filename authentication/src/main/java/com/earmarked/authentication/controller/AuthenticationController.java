@@ -114,6 +114,8 @@ public class AuthenticationController {
 
     @PostMapping(ApiPaths.RESET_PASSWORD)
     public ResponseEntity<ResetPasswordResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
+        authenticationService.resetPassword(resetPasswordRequest.token(), resetPasswordRequest.newPassword());
+
         return ResponseEntity.ok(new ResetPasswordResponse("Password reset successfully."));
     }
 }
