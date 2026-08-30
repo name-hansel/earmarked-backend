@@ -2,6 +2,7 @@ package com.earmarked.authentication.controller;
 
 import com.earmarked.authentication.config.ApiPaths;
 import com.earmarked.authentication.config.jwt.JwtConfiguration;
+import com.earmarked.authentication.dto.UserDTO;
 import com.earmarked.authentication.dto.activate_account.ActivateAccountRequest;
 import com.earmarked.authentication.dto.change_password.ChangePasswordRequest;
 import com.earmarked.authentication.dto.change_password.ChangePasswordResponse;
@@ -57,7 +58,8 @@ public class AuthenticationController {
 
     @GetMapping(ApiPaths.ME)
     public ResponseEntity<MeResponse> me(@AuthenticationPrincipal UUID userId) {
-        return ResponseEntity.ok(authenticationService.getCurrentUser(userId));
+        UserDTO currentUser = authenticationService.getCurrentUser(userId);
+        return ResponseEntity.ok(new MeResponse(currentUser.userId(), currentUser.username()));
     }
 
     @PostMapping(ApiPaths.LOGOUT)
@@ -103,7 +105,7 @@ public class AuthenticationController {
     @PostMapping(ApiPaths.FORGOT_PASSWORD)
     public ResponseEntity<ForgotPasswordResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         authenticationService.forgotPassword(forgotPasswordRequest.email());
-        
+
         return ResponseEntity.accepted().body(new ForgotPasswordResponse(
                 "If an account with this email address exists, a password reset link has been sent."));
     }

@@ -1,12 +1,15 @@
 package com.earmarked.authentication.service;
 
+import com.earmarked.authentication.dto.UserDTO;
 import com.earmarked.authentication.dto.delete_account.DeleteAccountRequest;
 import com.earmarked.authentication.dto.login.LoginRequest;
-import com.earmarked.authentication.dto.me.MeResponse;
 import com.earmarked.authentication.dto.result.TokenPair;
 import com.earmarked.authentication.exception.InvalidRefreshTokenException;
+import com.earmarked.authentication.service.email.EmailService;
 import com.earmarked.authentication.service.jwt.JwtService;
 import com.earmarked.authentication.service.jwt.RefreshTokenService;
+import com.earmarked.authentication.service.token.AccountActivationTokenService;
+import com.earmarked.authentication.service.token.PasswordResetTokenService;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,30 +24,36 @@ public class AuthenticationService {
     private final UserService userService;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final PasswordResetTokenService passwordResetTokenService;
+    private final AccountActivationTokenService accountActivationTokenService;
+    private final EmailService emailService;
 
     public void register(String email, String password, String username) {
         String trimmedEmail = email.trim();
         String trimmedUsername = username.trim();
-        userService.createNewUser(trimmedEmail, trimmedUsername, password);
+        UserDTO user = userService.createNewUser(trimmedEmail, trimmedUsername, password);
+
+        sendAccountActivationEmail(user);
     }
 
     @Transactional
     public void activateAccount(String token) {
-        userService.activateAccount(token);
+        UserDTO user = userService.activateAccount(token);
+        emailService.sendAccountActivatedEmail(user.email());
     }
 
     public TokenPair login(LoginRequest loginRequest) {
         String email = loginRequest.email().trim();
 
-        UUID userId = userService.authenticateUser(email, loginRequest.password());
+        UUID userId = userService.authenticateUser(email, loginRequest.password()).userId();
         UUID refreshTokenUuid = refreshTokenService.createRefreshToken(userId);
 
         return new TokenPair(jwtService.generateAccessToken(userId),
                 jwtService.generateRefreshToken(userId, refreshTokenUuid));
     }
 
-    public MeResponse getCurrentUser(UUID userId) {
-        return userService.getUserData(userId);
+    public UserDTO getCurrentUser(UUID userId) {
+        return userService.getUser(userId);
     }
 
     public void logout(String refreshToken) {
@@ -78,7 +87,11 @@ public class AuthenticationService {
 
     public void resendActivationEmail(String email) {
         String trimmedEmail = email.trim();
-        userService.resendActivationEmail(trimmedEmail);
+        UserDTO user = userService.findVerifiedUserByEmail(trimmedEmail);
+
+        if (user != null) {
+            sendAccountActivationEmail(user);
+        }
     }
 
     @Transactional
@@ -95,6 +108,16 @@ public class AuthenticationService {
 
     public void forgotPassword(String email) {
         String trimmedEmail = email.trim();
-        userService.initiateForgotPassword(trimmedEmail);
+        UserDTO user = userService.initiateForgotPassword(trimmedEmail);
+
+        if (user != null) {
+            String passwordResetToken = passwordResetTokenService.generatePasswordResetToken(user.userId());
+            emailService.sendPasswordResetEmail(user.email(), passwordResetToken);
+        }
+    }
+
+    private void sendAccountActivationEmail(UserDTO user) {
+        String accountActivationToken = accountActivationTokenService.generateAccountActivationToken(user.userId());
+        emailService.sendAccountActivationEmail(user.email(), accountActivationToken);
     }
 }
