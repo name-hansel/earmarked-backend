@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 @Profile("local")
 @Slf4j
 public class LocalEmailService implements EmailService {
-    private static final String LOCAL_FRONTEND_URL_ACCOUNT_ACTIVATION = "http://localhost:3000/activate-account?token=";
+    private static final String LOCAL_FRONTEND = "http://localhost:3000";
+    private static final String LOCAL_FRONTEND_URL_ACCOUNT_ACTIVATION = LOCAL_FRONTEND + "/activate-account?token=";
+    private static final String LOCAL_FRONTEND_URL_RESET_PASSWORD = LOCAL_FRONTEND + "/reset-password?token=";
 
     @Override
     public void sendAccountActivationEmail(String email, String token) {
@@ -25,5 +27,14 @@ public class LocalEmailService implements EmailService {
                 Account activated email
                 To: {}
                 """, email);
+    }
+
+    @Override
+    public void sendPasswordResetEmail(String email, String token) {
+        log.info("""
+                Password reset email
+                To: {}
+                Password reset URL: {}
+                """, email, LOCAL_FRONTEND_URL_RESET_PASSWORD + token);
     }
 }

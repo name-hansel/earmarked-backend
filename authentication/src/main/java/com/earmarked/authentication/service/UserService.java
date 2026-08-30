@@ -37,7 +37,7 @@ public class UserService {
     }
 
     public void activateAccount(String token) {
-        Optional<UUID> userUuid = accountActivationTokenService.validateToken(token);
+        Optional<UUID> userUuid = accountActivationTokenService.consumeToken(token);
 
         if (userUuid.isEmpty()) {
             throw new InvalidAccountActivationTokenException();
@@ -109,7 +109,9 @@ public class UserService {
             return;
         }
 
-        String passwordResetToken = passwordResetTokenService.generatePasswordResetToken(userOptional.get().getId());
+        UserEntity user = userOptional.get();
+        String passwordResetToken = passwordResetTokenService.generatePasswordResetToken(user.getId());
+        emailService.sendPasswordResetEmail(user.getEmail(), passwordResetToken);
     }
 
     private void checkExistingUserForRegistration(String email, String username) {

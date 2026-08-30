@@ -5,4 +5,6 @@ public interface EmailService {
     void sendAccountActivationEmail(String email, String token);
 
     void sendAccountActivatedEmail(String email);
+
+    void sendPasswordResetEmail(String email, String token);
 }

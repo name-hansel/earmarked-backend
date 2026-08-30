@@ -102,6 +102,8 @@ public class AuthenticationController {
 
     @PostMapping(ApiPaths.FORGOT_PASSWORD)
     public ResponseEntity<ForgotPasswordResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+        authenticationService.forgotPassword(forgotPasswordRequest.email());
+        
         return ResponseEntity.accepted().body(new ForgotPasswordResponse(
                 "If an account with this email address exists, a password reset link has been sent."));
     }
