@@ -39,6 +39,7 @@ public class AuthenticationController {
     @PostMapping(ApiPaths.REGISTER)
     public ResponseEntity<RegisterResponse> register(@RequestBody @Valid RegisterRequest registerRequest) {
         authenticationService.register(registerRequest.email(), registerRequest.password(), registerRequest.username());
+
         return ResponseEntity.ok(
                 new RegisterResponse("Account created successfully. Please check your inbox for verification."));
     }
@@ -46,6 +47,7 @@ public class AuthenticationController {
     @PostMapping(ApiPaths.ACTIVATE_ACCOUNT)
     public ResponseEntity<Void> activateAccount(@RequestBody @Valid ActivateAccountRequest activateAccountRequest) {
         authenticationService.activateAccount(activateAccountRequest.token());
+
         return ResponseEntity.noContent().build();
     }
 
@@ -61,6 +63,7 @@ public class AuthenticationController {
     @GetMapping(ApiPaths.ME)
     public ResponseEntity<MeResponse> me(@AuthenticationPrincipal UUID userId) {
         UserDTO currentUser = authenticationService.getCurrentUser(userId);
+
         return ResponseEntity.ok(new MeResponse(currentUser.userId(), currentUser.username()));
     }
 
@@ -92,6 +95,7 @@ public class AuthenticationController {
     @PostMapping(ApiPaths.RESEND_ACTIVATION)
     public ResponseEntity<ResendActivationResponse> resendActivation(@Valid @RequestBody ResendActivationRequest resendActivationRequest) {
         authenticationService.resendActivationEmail(resendActivationRequest.email());
+        
         return ResponseEntity.ok(new ResendActivationResponse(
                 "If an account with this email address exists, an activation link has been sent."));
     }
