@@ -5,6 +5,8 @@ import com.earmarked.authentication.dto.login.LoginRequest;
 import com.earmarked.authentication.dto.me.MeResponse;
 import com.earmarked.authentication.dto.result.TokenPair;
 import com.earmarked.authentication.exception.InvalidRefreshTokenException;
+import com.earmarked.authentication.service.jwt.JwtService;
+import com.earmarked.authentication.service.jwt.RefreshTokenService;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -75,7 +77,8 @@ public class AuthenticationService {
     }
 
     public void resendActivationEmail(String email) {
-        userService.resendActivationEmail(email);
+        String trimmedEmail = email.trim();
+        userService.resendActivationEmail(trimmedEmail);
     }
 
     @Transactional
@@ -88,5 +91,10 @@ public class AuthenticationService {
 
         UUID refreshTokenId = jwtService.extractTokenId(refreshToken);
         refreshTokenService.deleteAllExcept(userId, refreshTokenId);
+    }
+
+    public void forgotPassword(String email) {
+        String trimmedEmail = email.trim();
+        userService.initiateForgotPassword(trimmedEmail);
     }
 }

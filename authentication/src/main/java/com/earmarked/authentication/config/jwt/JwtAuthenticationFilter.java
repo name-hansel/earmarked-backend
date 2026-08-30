@@ -1,6 +1,6 @@
 package com.earmarked.authentication.config.jwt;
 
-import com.earmarked.authentication.service.JwtService;
+import com.earmarked.authentication.service.jwt.JwtService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

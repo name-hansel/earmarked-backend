@@ -5,6 +5,8 @@ import com.earmarked.authentication.entity.UserEntity;
 import com.earmarked.authentication.exception.*;
 import com.earmarked.authentication.repository.UserRepository;
 import com.earmarked.authentication.service.email.EmailService;
+import com.earmarked.authentication.service.token.AccountActivationTokenService;
+import com.earmarked.authentication.service.token.PasswordResetTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final AccountActivationTokenService accountActivationTokenService;
+    private final PasswordResetTokenService passwordResetTokenService;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -76,7 +79,7 @@ public class UserService {
     }
 
     public void resendActivationEmail(String email) {
-        Optional<UserEntity> unverifiedUserOptional = userRepository.findByEmailAndVerifiedFalse(email);
+        Optional<UserEntity> unverifiedUserOptional = userRepository.findByEmailAndVerified(email, false);
 
         if (unverifiedUserOptional.isEmpty()) {
             return;
@@ -97,6 +100,16 @@ public class UserService {
         }
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));
+    }
+
+    public void initiateForgotPassword(String email) {
+        Optional<UserEntity> userOptional = userRepository.findByEmailAndVerified(email, true);
+
+        if (userOptional.isEmpty()) {
+            return;
+        }
+
+        String passwordResetToken = passwordResetTokenService.generatePasswordResetToken(userOptional.get().getId());
     }
 
     private void checkExistingUserForRegistration(String email, String username) {

@@ -1,4 +1,4 @@
-package com.earmarked.authentication.service;
+package com.earmarked.authentication.service.token;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;

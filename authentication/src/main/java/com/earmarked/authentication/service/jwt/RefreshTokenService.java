@@ -1,4 +1,4 @@
-package com.earmarked.authentication.service;
+package com.earmarked.authentication.service.jwt;
 
 import com.earmarked.authentication.config.jwt.JwtProperties;
 import com.earmarked.authentication.entity.RefreshTokenEntity;
