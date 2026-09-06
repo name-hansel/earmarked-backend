@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 @Service
 @Profile("local")
 @Slf4j
-// TODO: Add @Async annotation
 public class LocalEmailService implements EmailService {
     private static final String LOCAL_FRONTEND = "http://localhost:3000";
     private static final String LOCAL_FRONTEND_URL_ACCOUNT_ACTIVATION = LOCAL_FRONTEND + "/activate-account?token=";
