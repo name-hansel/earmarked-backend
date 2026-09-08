@@ -32,12 +32,13 @@ public class GatewayRoutes {
                     .headers(headers -> headers.remove(HttpHeaders.COOKIE));
 
             if (accessTokenCookie != null) {
-                builder.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessTokenCookie.getValue());
+                builder.header(HttpHeaders.AUTHORIZATION,
+                        JwtConfiguration.BEARER_PREFIX + accessTokenCookie.getValue());
             }
 
             // TODO: Scope only to /refresh and /logout?
             if (refreshTokenCookie != null) {
-                builder.header("X-Refresh-Token", refreshTokenCookie.getValue());
+                builder.header(JwtConfiguration.REFRESH_TOKEN_HEADER, refreshTokenCookie.getValue());
             }
 
             return builder.build();

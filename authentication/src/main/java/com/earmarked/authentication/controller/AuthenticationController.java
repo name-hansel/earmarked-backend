@@ -68,7 +68,7 @@ public class AuthenticationController {
     }
 
     @PostMapping(ApiPaths.LOGOUT)
-    public ResponseEntity<Void> logout(@CookieValue(name = JwtConfiguration.REFRESH_TOKEN_COOKIE, required = false) String refreshToken, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<Void> logout(@RequestHeader(name = JwtConfiguration.REFRESH_TOKEN_HEADER, required = false) String refreshToken, HttpServletResponse httpServletResponse) {
         authenticationService.logout(refreshToken);
         jwtCookieService.clearCookies(httpServletResponse);
 
@@ -76,7 +76,7 @@ public class AuthenticationController {
     }
 
     @PostMapping(ApiPaths.REFRESH)
-    public ResponseEntity<Void> refresh(@CookieValue(name = JwtConfiguration.REFRESH_TOKEN_COOKIE, required = false) String refreshToken, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<Void> refresh(@CookieValue(name = JwtConfiguration.REFRESH_TOKEN_HEADER, required = false) String refreshToken, HttpServletResponse httpServletResponse) {
         TokenPair tokenPair = authenticationService.refresh(refreshToken);
         jwtCookieService.addAccessTokenCookie(tokenPair.accessToken(), httpServletResponse);
         jwtCookieService.addRefreshTokenCookie(tokenPair.refreshToken(), httpServletResponse);
@@ -95,13 +95,13 @@ public class AuthenticationController {
     @PostMapping(ApiPaths.RESEND_ACTIVATION)
     public ResponseEntity<ResendActivationResponse> resendActivation(@Valid @RequestBody ResendActivationRequest resendActivationRequest) {
         authenticationService.resendActivationEmail(resendActivationRequest.email());
-        
+
         return ResponseEntity.ok(new ResendActivationResponse(
                 "If an account with this email address exists, an activation link has been sent."));
     }
 
     @PatchMapping(ApiPaths.CHANGE_PASSWORD)
-    public ResponseEntity<ChangePasswordResponse> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest, @AuthenticationPrincipal UUID userId, @CookieValue(name = JwtConfiguration.REFRESH_TOKEN_COOKIE, required = false) String refreshToken) {
+    public ResponseEntity<ChangePasswordResponse> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest, @AuthenticationPrincipal UUID userId, @CookieValue(name = JwtConfiguration.REFRESH_TOKEN_HEADER, required = false) String refreshToken) {
         authenticationService.changePassword(userId, changePasswordRequest.newPassword(),
                 changePasswordRequest.oldPassword(), refreshToken);
 

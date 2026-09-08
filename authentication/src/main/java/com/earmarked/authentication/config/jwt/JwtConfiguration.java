@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableConfigurationProperties(JwtProperties.class)
 public class JwtConfiguration {
-    public static final String REFRESH_TOKEN_COOKIE = "REFRESH_TOKEN";
     public static final String BEARER_PREFIX = "Bearer ";
+    public static final String REFRESH_TOKEN_HEADER = "X-Refresh-Token";
 
     public enum TokenType {
         ACCESS_TOKEN, REFRESH_TOKEN;
