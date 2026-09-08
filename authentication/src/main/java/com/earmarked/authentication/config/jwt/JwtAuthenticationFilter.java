@@ -4,12 +4,12 @@ import com.earmarked.authentication.service.jwt.JwtService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 
 @RequiredArgsConstructor
@@ -45,12 +44,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String extractAccessToken(HttpServletRequest request) {
-        if (request.getCookies() == null) {
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        if (header == null || !header.startsWith(JwtConfiguration.BEARER_PREFIX)) {
             return null;
         }
 
-        return Arrays.stream(request.getCookies())
-                .filter(cookie -> JwtConfiguration.TokenType.accessToken().equals(cookie.getName()))
-                .map(Cookie::getValue).findFirst().orElse(null);
+        return header.substring(JwtConfiguration.BEARER_PREFIX.length());
     }
 }
