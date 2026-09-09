@@ -19,7 +19,7 @@ import com.earmarked.authentication.dto.reset_password.ResetPasswordRequest;
 import com.earmarked.authentication.dto.reset_password.ResetPasswordResponse;
 import com.earmarked.authentication.dto.result.TokenPair;
 import com.earmarked.authentication.service.AuthenticationService;
-import com.earmarked.authentication.service.JwtCookieService;
+import com.earmarked.authentication.service.jwt.JwtHeaderService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ import java.util.UUID;
 @RestController
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
-    private final JwtCookieService jwtCookieService;
+    private final JwtHeaderService jwtHeaderService;
 
     @PostMapping(ApiPaths.REGISTER)
     public ResponseEntity<RegisterResponse> register(@RequestBody @Valid RegisterRequest registerRequest) {
@@ -54,8 +54,8 @@ public class AuthenticationController {
     @PostMapping(ApiPaths.LOGIN)
     public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
         TokenPair tokenPair = authenticationService.login(loginRequest);
-        jwtCookieService.addAccessTokenCookie(tokenPair.accessToken(), httpServletResponse);
-        jwtCookieService.addRefreshTokenCookie(tokenPair.refreshToken(), httpServletResponse);
+        jwtHeaderService.addAccessTokenHeader(tokenPair.accessToken(), httpServletResponse);
+        jwtHeaderService.addRefreshTokenHeader(tokenPair.refreshToken(), httpServletResponse);
 
         return ResponseEntity.noContent().build();
     }
@@ -68,9 +68,8 @@ public class AuthenticationController {
     }
 
     @PostMapping(ApiPaths.LOGOUT)
-    public ResponseEntity<Void> logout(@RequestHeader(name = JwtConfiguration.REFRESH_TOKEN_HEADER, required = false) String refreshToken, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<Void> logout(@RequestHeader(name = JwtConfiguration.REFRESH_TOKEN_HEADER, required = false) String refreshToken) {
         authenticationService.logout(refreshToken);
-        jwtCookieService.clearCookies(httpServletResponse);
 
         return ResponseEntity.noContent().build();
     }
@@ -78,16 +77,15 @@ public class AuthenticationController {
     @PostMapping(ApiPaths.REFRESH)
     public ResponseEntity<Void> refresh(@CookieValue(name = JwtConfiguration.REFRESH_TOKEN_HEADER, required = false) String refreshToken, HttpServletResponse httpServletResponse) {
         TokenPair tokenPair = authenticationService.refresh(refreshToken);
-        jwtCookieService.addAccessTokenCookie(tokenPair.accessToken(), httpServletResponse);
-        jwtCookieService.addRefreshTokenCookie(tokenPair.refreshToken(), httpServletResponse);
+        jwtHeaderService.addAccessTokenHeader(tokenPair.accessToken(), httpServletResponse);
+        jwtHeaderService.addRefreshTokenHeader(tokenPair.refreshToken(), httpServletResponse);
 
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping(ApiPaths.DELETE_ACCOUNT)
-    public ResponseEntity<Void> deleteAccount(@Valid @RequestBody DeleteAccountRequest deleteAccountRequest, @AuthenticationPrincipal UUID userId, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<Void> deleteAccount(@Valid @RequestBody DeleteAccountRequest deleteAccountRequest, @AuthenticationPrincipal UUID userId) {
         authenticationService.deleteAccount(deleteAccountRequest, userId);
-        jwtCookieService.clearCookies(httpServletResponse);
 
         return ResponseEntity.noContent().build();
     }

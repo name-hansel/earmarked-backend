@@ -19,19 +19,19 @@ public class JwtCookieService {
     private static final String ACCESS_TOKEN_COOKIE_PATH = "/";
     private static final String REFRESH_TOKEN_COOKIE_PATH = ApiPaths.AUTH;
 
-    public void addAccessTokenCookie(String accessToken, HttpServletResponse response) {
+    private void addAccessTokenCookie(String accessToken, HttpServletResponse response) {
         response.addHeader(HttpHeaders.SET_COOKIE,
                 buildCookie(JwtConfiguration.TokenType.accessToken(), accessToken, ACCESS_TOKEN_COOKIE_PATH,
                         jwtProperties.accessTokenExpirationSeconds()).toString());
     }
 
-    public void addRefreshTokenCookie(String refreshToken, HttpServletResponse response) {
+    private void addRefreshTokenCookie(String refreshToken, HttpServletResponse response) {
         response.addHeader(HttpHeaders.SET_COOKIE,
                 buildCookie(JwtConfiguration.TokenType.refreshToken(), refreshToken, REFRESH_TOKEN_COOKIE_PATH,
                         jwtProperties.refreshTokenExpirationSeconds()).toString());
     }
 
-    public void clearCookies(HttpServletResponse response) {
+    private void clearCookies(HttpServletResponse response) {
         response.addHeader(HttpHeaders.SET_COOKIE,
                 clearCookie(JwtConfiguration.TokenType.accessToken(), ACCESS_TOKEN_COOKIE_PATH).toString());
         response.addHeader(HttpHeaders.SET_COOKIE,
