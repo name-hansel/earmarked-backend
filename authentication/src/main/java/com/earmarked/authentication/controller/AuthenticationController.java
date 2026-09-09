@@ -75,7 +75,7 @@ public class AuthenticationController {
     }
 
     @PostMapping(ApiPaths.REFRESH)
-    public ResponseEntity<Void> refresh(@CookieValue(name = JwtConfiguration.REFRESH_TOKEN_HEADER, required = false) String refreshToken, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<Void> refresh(@RequestHeader(name = JwtConfiguration.REFRESH_TOKEN_HEADER, required = false) String refreshToken, HttpServletResponse httpServletResponse) {
         TokenPair tokenPair = authenticationService.refresh(refreshToken);
         jwtHeaderService.addAccessTokenHeader(tokenPair.accessToken(), httpServletResponse);
         jwtHeaderService.addRefreshTokenHeader(tokenPair.refreshToken(), httpServletResponse);
@@ -99,7 +99,7 @@ public class AuthenticationController {
     }
 
     @PatchMapping(ApiPaths.CHANGE_PASSWORD)
-    public ResponseEntity<ChangePasswordResponse> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest, @AuthenticationPrincipal UUID userId, @CookieValue(name = JwtConfiguration.REFRESH_TOKEN_HEADER, required = false) String refreshToken) {
+    public ResponseEntity<ChangePasswordResponse> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest, @AuthenticationPrincipal UUID userId, @RequestHeader(name = JwtConfiguration.REFRESH_TOKEN_HEADER, required = false) String refreshToken) {
         authenticationService.changePassword(userId, changePasswordRequest.newPassword(),
                 changePasswordRequest.oldPassword(), refreshToken);
 
