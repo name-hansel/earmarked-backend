@@ -1,4 +1,4 @@
-package com.earmarked.gateway.config;
+package com.earmarked.gateway.config.jwt;
 
 public class JwtConfiguration {
     public static final String BEARER_PREFIX = "Bearer ";

@@ -1,13 +1,19 @@
 package com.earmarked.gateway.config;
 
+import com.earmarked.gateway.config.jwt.JwtConfiguration;
+import com.earmarked.gateway.config.jwt.JwtService;
 import com.earmarked.gateway.config.services.ServiceBaseUrlProperties;
+import org.springframework.boot.web.server.Cookie;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -19,26 +25,21 @@ import static org.springframework.cloud.gateway.server.mvc.predicate.GatewayRequ
 @Configuration
 public class GatewayRoutes {
     private ServiceBaseUrlProperties serviceBaseUrlProperties;
+    private JwtService jwtService;
+
+    private static final String ACCESS_TOKEN_COOKIE_PATH = "/";
+    private static final String REFRESH_TOKEN_COOKIE_PATH = ApiPaths.AUTH_BASE;
 
     @Bean
     public RouterFunction<ServerResponse> authServiceRoute() {
-        return route("auth-login-refresh")
-                .route(path(ApiPaths.LOGIN).or(path(ApiPaths.REFRESH)), http())
-                .before(translateCookiesToHeaders())
-                .before(uri(serviceBaseUrlProperties.auth()))
-                .after(setAuthCookies())
-                .build()
-                .and(route("auth-logout-delete-account")
-                        .route(path(ApiPaths.LOGOUT).or(path(ApiPaths.DELETE_ACCOUNT)), http())
-                        .before(translateCookiesToHeaders())
-                        .before(uri(serviceBaseUrlProperties.auth()))
-                        .after(clearAuthCookies())
-                        .build())
-                .and(route("auth-generic")
-                        .route(path(ApiPaths.AUTH_WILDCARD), http())
-                        .before(translateCookiesToHeaders())
-                        .before(uri(serviceBaseUrlProperties.auth()))
-                        .build());
+        return route("auth-login-refresh").route(path(ApiPaths.LOGIN).or(path(ApiPaths.REFRESH)), http())
+                .before(translateCookiesToHeaders()).before(uri(serviceBaseUrlProperties.auth()))
+                .after(setAuthCookies()).build()
+                .and(route("auth-logout-delete-account").route(path(ApiPaths.LOGOUT).or(path(ApiPaths.DELETE_ACCOUNT)),
+                                http()).before(translateCookiesToHeaders()).before(uri(serviceBaseUrlProperties.auth()))
+                        .after(clearAuthCookies()).build())
+                .and(route("auth-generic").route(path(ApiPaths.AUTH_WILDCARD), http())
+                        .before(translateCookiesToHeaders()).before(uri(serviceBaseUrlProperties.auth())).build());
     }
 
     private Function<ServerRequest, ServerRequest> translateCookiesToHeaders() {
@@ -71,11 +72,17 @@ public class GatewayRoutes {
 
             if (authHeader != null && authHeader.startsWith(JwtConfiguration.BEARER_PREFIX)) {
                 String accessToken = authHeader.substring(JwtConfiguration.BEARER_PREFIX.length());
-                // TODO: Set cookie
+                Duration maxAge = Duration.between(Instant.now(), jwtService.extractExpiration(accessToken));
+                builder.header(HttpHeaders.SET_COOKIE,
+                        buildCookie(JwtConfiguration.TokenType.accessToken(), accessToken, ACCESS_TOKEN_COOKIE_PATH,
+                                maxAge).toString());
             }
 
             if (refreshHeader != null) {
-                // TODO: Set cookie
+                Duration maxAge = Duration.between(Instant.now(), jwtService.extractExpiration(refreshHeader));
+                builder.header(HttpHeaders.SET_COOKIE,
+                        buildCookie(JwtConfiguration.TokenType.refreshToken(), refreshHeader, REFRESH_TOKEN_COOKIE_PATH,
+                                maxAge).toString());
             }
 
             return builder.build();
@@ -90,5 +97,10 @@ public class GatewayRoutes {
 
             return builder.build();
         };
+    }
+
+    private ResponseCookie buildCookie(String name, String value, String path, Duration maxAge) {
+        return ResponseCookie.from(name, value).httpOnly(true).secure(true).sameSite(Cookie.SameSite.STRICT.name())
+                .path(path).maxAge(maxAge).build();
     }
 }
