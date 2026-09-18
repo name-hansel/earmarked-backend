@@ -93,6 +93,10 @@ public class GatewayRoutes {
 
     private BiFunction<ServerRequest, ServerResponse, ServerResponse> clearAuthCookies() {
         return (request, response) -> {
+            if (!response.statusCode().is2xxSuccessful()) {
+                return response;
+            }
+
             ServerResponse.BodyBuilder builder = ServerResponse.from(response);
             builder.header(HttpHeaders.SET_COOKIE,
                     clearCookie(JwtConfiguration.TokenType.accessToken(), ACCESS_TOKEN_COOKIE_PATH).toString());
