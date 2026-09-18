@@ -3,6 +3,7 @@ package com.earmarked.gateway.config;
 import com.earmarked.gateway.config.jwt.JwtConfiguration;
 import com.earmarked.gateway.config.jwt.JwtService;
 import com.earmarked.gateway.config.services.ServiceBaseUrlProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.server.Cookie;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,9 +26,10 @@ import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFuncti
 import static org.springframework.cloud.gateway.server.mvc.predicate.GatewayRequestPredicates.path;
 
 @Configuration
+@RequiredArgsConstructor
 public class GatewayRoutes {
-    private ServiceBaseUrlProperties serviceBaseUrlProperties;
-    private JwtService jwtService;
+    private final ServiceBaseUrlProperties serviceBaseUrlProperties;
+    private final JwtService jwtService;
 
     @Bean
     public RouterFunction<ServerResponse> authServiceRoute() {
