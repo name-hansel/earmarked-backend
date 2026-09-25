@@ -33,29 +33,31 @@ public class GatewayRoutes {
 
     @Bean
     public RouterFunction<ServerResponse> authServiceRoute() {
-        return route("auth-login-refresh")
-                .route(path(ApiPaths.LOGIN).or(path(ApiPaths.REFRESH)), http())
-                .before(translateCookiesToHeaders())
+        return route("auth-login")
+                .route(path(ApiPaths.LOGIN), http())
                 .before(uri(serviceBaseUrlProperties.auth()))
                 .after(setAuthCookies())
                 .build()
+                .and(route("auth-refresh").route(path(ApiPaths.REFRESH), http())
+                        .before(translateRefreshCookieToHeader())
+                        .before(uri(serviceBaseUrlProperties.auth()))
+                        .after(setAuthCookies())
+                        .build())
                 .and(route("auth-logout-delete-account").route(path(ApiPaths.LOGOUT).or(path(ApiPaths.DELETE_ACCOUNT)),
                                 http())
-                        .before(translateCookiesToHeaders())
+                        .before(translateAccessCookieToHeader())
                         .before(uri(serviceBaseUrlProperties.auth()))
                         .after(clearAuthCookies())
                         .build())
                 .and(route("auth-generic").route(path(ApiPaths.AUTH_WILDCARD), http())
-                        .before(translateCookiesToHeaders())
+                        .before(translateAccessCookieToHeader())
                         .before(uri(serviceBaseUrlProperties.auth()))
                         .build());
     }
 
-    private Function<ServerRequest, ServerRequest> translateCookiesToHeaders() {
+    private Function<ServerRequest, ServerRequest> translateAccessCookieToHeader() {
         return (request) -> {
             var accessTokenCookie = request.cookies().getFirst(JwtConfiguration.TokenType.accessToken());
-            var refreshTokenCookie = request.cookies().getFirst(JwtConfiguration.TokenType.refreshToken());
-
             ServerRequest.Builder builder = ServerRequest.from(request)
                     .headers(headers -> headers.remove(HttpHeaders.COOKIE));
 
@@ -63,6 +65,17 @@ public class GatewayRoutes {
                 builder.header(HttpHeaders.AUTHORIZATION,
                         JwtConfiguration.BEARER_PREFIX + accessTokenCookie.getValue());
             }
+
+
+            return builder.build();
+        };
+    }
+
+    private Function<ServerRequest, ServerRequest> translateRefreshCookieToHeader() {
+        return (request) -> {
+            var refreshTokenCookie = request.cookies().getFirst(JwtConfiguration.TokenType.refreshToken());
+            ServerRequest.Builder builder = ServerRequest.from(request)
+                    .headers(headers -> headers.remove(HttpHeaders.COOKIE));
 
             if (refreshTokenCookie != null) {
                 builder.header(JwtConfiguration.REFRESH_TOKEN_HEADER, refreshTokenCookie.getValue());
