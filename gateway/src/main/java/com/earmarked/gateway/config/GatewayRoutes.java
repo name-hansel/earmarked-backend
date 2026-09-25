@@ -33,14 +33,22 @@ public class GatewayRoutes {
 
     @Bean
     public RouterFunction<ServerResponse> authServiceRoute() {
-        return route("auth-login-refresh").route(path(ApiPaths.LOGIN).or(path(ApiPaths.REFRESH)), http())
-                .before(translateCookiesToHeaders()).before(uri(serviceBaseUrlProperties.auth()))
-                .after(setAuthCookies()).build()
+        return route("auth-login-refresh")
+                .route(path(ApiPaths.LOGIN).or(path(ApiPaths.REFRESH)), http())
+                .before(translateCookiesToHeaders())
+                .before(uri(serviceBaseUrlProperties.auth()))
+                .after(setAuthCookies())
+                .build()
                 .and(route("auth-logout-delete-account").route(path(ApiPaths.LOGOUT).or(path(ApiPaths.DELETE_ACCOUNT)),
-                                http()).before(translateCookiesToHeaders()).before(uri(serviceBaseUrlProperties.auth()))
-                        .after(clearAuthCookies()).build())
+                                http())
+                        .before(translateCookiesToHeaders())
+                        .before(uri(serviceBaseUrlProperties.auth()))
+                        .after(clearAuthCookies())
+                        .build())
                 .and(route("auth-generic").route(path(ApiPaths.AUTH_WILDCARD), http())
-                        .before(translateCookiesToHeaders()).before(uri(serviceBaseUrlProperties.auth())).build());
+                        .before(translateCookiesToHeaders())
+                        .before(uri(serviceBaseUrlProperties.auth()))
+                        .build());
     }
 
     private Function<ServerRequest, ServerRequest> translateCookiesToHeaders() {
@@ -66,6 +74,10 @@ public class GatewayRoutes {
 
     private BiFunction<ServerRequest, ServerResponse, ServerResponse> setAuthCookies() {
         return (request, response) -> {
+            if (!response.statusCode().is2xxSuccessful()) {
+                return response;
+            }
+
             String authHeader = response.headers().getFirst(HttpHeaders.AUTHORIZATION);
             String refreshHeader = response.headers().getFirst(JwtConfiguration.REFRESH_TOKEN_HEADER);
 
