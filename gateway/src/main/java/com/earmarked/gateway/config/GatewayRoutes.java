@@ -3,20 +3,23 @@ package com.earmarked.gateway.config;
 import com.earmarked.gateway.config.jwt.JwtConfiguration;
 import com.earmarked.gateway.config.jwt.JwtService;
 import com.earmarked.gateway.config.services.ServiceBaseUrlProperties;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.server.Cookie;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.web.servlet.function.HandlerFilterFunction;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import static com.earmarked.gateway.config.jwt.JwtConfiguration.ACCESS_TOKEN_COOKIE_PATH;
 import static com.earmarked.gateway.config.jwt.JwtConfiguration.REFRESH_TOKEN_COOKIE_PATH;
@@ -39,49 +42,70 @@ public class GatewayRoutes {
                 .after(setAuthCookies())
                 .build()
                 .and(route("auth-refresh").route(path(ApiPaths.REFRESH), http())
-                        .before(translateRefreshCookieToHeader())
+                        .filter(validateAndTranslateRefreshToken())
                         .before(uri(serviceBaseUrlProperties.auth()))
                         .after(setAuthCookies())
                         .build())
                 .and(route("auth-logout-delete-account").route(path(ApiPaths.LOGOUT).or(path(ApiPaths.DELETE_ACCOUNT)),
                                 http())
-                        .before(translateAccessCookieToHeader())
+                        .filter(validateAndTranslateAccessToken())
                         .before(uri(serviceBaseUrlProperties.auth()))
                         .after(clearAuthCookies())
                         .build())
                 .and(route("auth-generic").route(path(ApiPaths.AUTH_WILDCARD), http())
-                        .before(translateAccessCookieToHeader())
+                        .filter(validateAndTranslateAccessToken())
                         .before(uri(serviceBaseUrlProperties.auth()))
                         .build());
     }
 
-    private Function<ServerRequest, ServerRequest> translateAccessCookieToHeader() {
-        return (request) -> {
-            var accessTokenCookie = request.cookies().getFirst(JwtConfiguration.TokenType.accessToken());
+    private HandlerFilterFunction<ServerResponse, ServerResponse> validateAndTranslateAccessToken() {
+        return (request, next) -> {
+            var cookie = request.cookies().getFirst(JwtConfiguration.TokenType.accessToken());
+
+            if (cookie != null) {
+                try {
+                    jwtService.extractClaims(cookie.getValue());
+                } catch (JwtException | IllegalArgumentException e) {
+                    // TODO: Change
+                    return ServerResponse.status(HttpStatus.UNAUTHORIZED)
+                            .body(Map.of("error", "invalid_token"));
+                }
+            }
+
             ServerRequest.Builder builder = ServerRequest.from(request)
                     .headers(headers -> headers.remove(HttpHeaders.COOKIE));
 
-            if (accessTokenCookie != null) {
+            if (cookie != null) {
                 builder.header(HttpHeaders.AUTHORIZATION,
-                        JwtConfiguration.BEARER_PREFIX + accessTokenCookie.getValue());
+                        JwtConfiguration.BEARER_PREFIX + cookie.getValue());
             }
 
-
-            return builder.build();
+            return next.handle(builder.build());
         };
     }
 
-    private Function<ServerRequest, ServerRequest> translateRefreshCookieToHeader() {
-        return (request) -> {
-            var refreshTokenCookie = request.cookies().getFirst(JwtConfiguration.TokenType.refreshToken());
+    private HandlerFilterFunction<ServerResponse, ServerResponse> validateAndTranslateRefreshToken() {
+        return (request, next) -> {
+            var cookie = request.cookies().getFirst(JwtConfiguration.TokenType.refreshToken());
+
+            if (cookie != null) {
+                try {
+                    jwtService.extractClaims(cookie.getValue());
+                } catch (JwtException | IllegalArgumentException e) {
+                    // TODO: Change
+                    return ServerResponse.status(HttpStatus.UNAUTHORIZED)
+                            .body(Map.of("error", "invalid_token"));
+                }
+            }
+
             ServerRequest.Builder builder = ServerRequest.from(request)
                     .headers(headers -> headers.remove(HttpHeaders.COOKIE));
 
-            if (refreshTokenCookie != null) {
-                builder.header(JwtConfiguration.REFRESH_TOKEN_HEADER, refreshTokenCookie.getValue());
+            if (cookie != null) {
+                builder.header(JwtConfiguration.REFRESH_TOKEN_HEADER, cookie.getValue());
             }
 
-            return builder.build();
+            return next.handle(builder.build());
         };
     }
 
