@@ -18,7 +18,6 @@ import org.springframework.web.servlet.function.ServerResponse;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
 import java.util.function.BiFunction;
 
 import static com.earmarked.gateway.config.jwt.JwtConfiguration.ACCESS_TOKEN_COOKIE_PATH;
@@ -66,9 +65,7 @@ public class GatewayRoutes {
                 try {
                     jwtService.extractClaims(cookie.getValue());
                 } catch (JwtException | IllegalArgumentException e) {
-                    // TODO: Change
-                    return ServerResponse.status(HttpStatus.UNAUTHORIZED)
-                            .body(Map.of("error", "invalid_token"));
+                    return getInvalidTokenServerResponse();
                 }
             }
 
@@ -92,9 +89,7 @@ public class GatewayRoutes {
                 try {
                     jwtService.extractClaims(cookie.getValue());
                 } catch (JwtException | IllegalArgumentException e) {
-                    // TODO: Change
-                    return ServerResponse.status(HttpStatus.UNAUTHORIZED)
-                            .body(Map.of("error", "invalid_token"));
+                    return getInvalidTokenServerResponse();
                 }
             }
 
@@ -163,5 +158,14 @@ public class GatewayRoutes {
 
     private ResponseCookie clearCookie(String name, String path) {
         return buildCookie(name, "", path, Duration.ZERO);
+    }
+
+    private record GatewayError(String code, String message) {
+
+    }
+
+    private static ServerResponse getInvalidTokenServerResponse() {
+        return ServerResponse.status(HttpStatus.UNAUTHORIZED)
+                .body(new GatewayError("INVALID_TOKEN", "Invalid token"));
     }
 }
