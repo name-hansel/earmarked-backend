@@ -45,9 +45,11 @@ public class GatewayRoutes {
                         .before(uri(serviceBaseUrlProperties.auth()))
                         .after(setAuthCookies())
                         .build())
-                .and(route("auth-logout-delete-account").route(path(ApiPaths.LOGOUT).or(path(ApiPaths.DELETE_ACCOUNT)),
+                .and(route("auth-logout-delete-account-change-password").route(
+                                path(ApiPaths.LOGOUT).or(path(ApiPaths.DELETE_ACCOUNT).or(path(ApiPaths.CHANGE_PASSWORD))),
                                 http())
                         .filter(validateAndTranslateAccessToken())
+                        .filter(validateAndTranslateRefreshToken())
                         .before(uri(serviceBaseUrlProperties.auth()))
                         .after(clearAuthCookies())
                         .build())

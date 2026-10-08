@@ -6,5 +6,6 @@ public class ApiPaths {
     public static final String REFRESH = AUTH_BASE + "/refresh";
     public static final String LOGOUT = AUTH_BASE + "/logout";
     public static final String DELETE_ACCOUNT = AUTH_BASE + "/delete-account";
+    public static final String CHANGE_PASSWORD = AUTH_BASE + "/change-password";
     public static final String AUTH_WILDCARD = AUTH_BASE + "/**";
 }
