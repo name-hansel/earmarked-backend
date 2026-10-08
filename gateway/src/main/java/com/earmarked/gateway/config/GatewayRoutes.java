@@ -112,15 +112,17 @@ public class GatewayRoutes {
                 return response;
             }
 
+            HttpHeaders headers = response.headers();
             String authHeader = response.headers().getFirst(HttpHeaders.AUTHORIZATION);
             String refreshHeader = response.headers().getFirst(JwtConfiguration.REFRESH_TOKEN_HEADER);
 
-            ServerResponse.BodyBuilder builder = ServerResponse.from(response);
+            headers.remove(HttpHeaders.AUTHORIZATION);
+            headers.remove(JwtConfiguration.REFRESH_TOKEN_HEADER);
 
             if (authHeader != null && authHeader.startsWith(JwtConfiguration.BEARER_PREFIX)) {
                 String accessToken = authHeader.substring(JwtConfiguration.BEARER_PREFIX.length());
                 Duration maxAge = Duration.between(Instant.now(), jwtService.extractExpiration(accessToken));
-                builder.header(HttpHeaders.SET_COOKIE,
+                headers.add(HttpHeaders.SET_COOKIE,
                         buildCookie(JwtConfiguration.TokenType.accessToken(), accessToken,
                                 ACCESS_TOKEN_COOKIE_PATH,
                                 maxAge).toString());
@@ -128,12 +130,12 @@ public class GatewayRoutes {
 
             if (refreshHeader != null) {
                 Duration maxAge = Duration.between(Instant.now(), jwtService.extractExpiration(refreshHeader));
-                builder.header(HttpHeaders.SET_COOKIE,
+                headers.add(HttpHeaders.SET_COOKIE,
                         buildCookie(JwtConfiguration.TokenType.refreshToken(), refreshHeader, REFRESH_TOKEN_COOKIE_PATH,
                                 maxAge).toString());
             }
 
-            return builder.build();
+            return response;
         };
     }
 
