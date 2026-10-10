@@ -46,12 +46,17 @@ public class GatewayRoutes {
                         .after(setAuthCookies())
                         .build())
                 .and(route("auth-logout-delete-account-change-password").route(
-                                path(ApiPaths.LOGOUT).or(path(ApiPaths.DELETE_ACCOUNT).or(path(ApiPaths.CHANGE_PASSWORD))),
+                                path(ApiPaths.LOGOUT).or(path(ApiPaths.DELETE_ACCOUNT)),
                                 http())
                         .filter(validateAndTranslateAccessToken())
                         .filter(validateAndTranslateRefreshToken())
                         .before(uri(serviceBaseUrlProperties.auth()))
                         .after(clearAuthCookies())
+                        .build())
+                .and(route("auth-change-password").route(path(ApiPaths.CHANGE_PASSWORD), http())
+                        .filter(validateAndTranslateAccessToken())
+                        .filter(validateAndTranslateRefreshToken())
+                        .before(uri(serviceBaseUrlProperties.auth()))
                         .build())
                 .and(route("auth-generic").route(path(ApiPaths.AUTH_WILDCARD), http())
                         .filter(validateAndTranslateAccessToken())
