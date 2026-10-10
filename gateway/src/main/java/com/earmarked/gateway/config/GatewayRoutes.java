@@ -65,32 +65,17 @@ public class GatewayRoutes {
     }
 
     private HandlerFilterFunction<ServerResponse, ServerResponse> validateAndTranslateAccessToken() {
-        return (request, next) -> {
-            var cookie = request.cookies().getFirst(JwtConfiguration.TokenType.accessToken());
-
-            if (cookie != null) {
-                try {
-                    jwtService.extractClaims(cookie.getValue());
-                } catch (JwtException | IllegalArgumentException e) {
-                    return getInvalidTokenServerResponse();
-                }
-            }
-
-            ServerRequest.Builder builder = ServerRequest.from(request)
-                    .headers(headers -> headers.remove(HttpHeaders.COOKIE));
-
-            if (cookie != null) {
-                builder.header(HttpHeaders.AUTHORIZATION,
-                        JwtConfiguration.BEARER_PREFIX + cookie.getValue());
-            }
-
-            return next.handle(builder.build());
-        };
+        return tokenFilter(JwtConfiguration.TokenType.accessToken(), HttpHeaders.AUTHORIZATION,
+                JwtConfiguration.BEARER_PREFIX);
     }
 
     private HandlerFilterFunction<ServerResponse, ServerResponse> validateAndTranslateRefreshToken() {
+        return tokenFilter(JwtConfiguration.TokenType.refreshToken(), JwtConfiguration.REFRESH_TOKEN_HEADER, "");
+    }
+
+    private HandlerFilterFunction<ServerResponse, ServerResponse> tokenFilter(String tokenType, String cookieHeaderName, String cookieValuePrefix) {
         return (request, next) -> {
-            var cookie = request.cookies().getFirst(JwtConfiguration.TokenType.refreshToken());
+            jakarta.servlet.http.Cookie cookie = request.cookies().getFirst(tokenType);
 
             if (cookie != null) {
                 try {
@@ -101,10 +86,13 @@ public class GatewayRoutes {
             }
 
             ServerRequest.Builder builder = ServerRequest.from(request)
-                    .headers(headers -> headers.remove(HttpHeaders.COOKIE));
+                    .headers(headers -> {
+                        headers.remove(HttpHeaders.COOKIE);
+                        headers.remove(cookieHeaderName);
+                    });
 
             if (cookie != null) {
-                builder.header(JwtConfiguration.REFRESH_TOKEN_HEADER, cookie.getValue());
+                builder.header(cookieHeaderName, cookieValuePrefix + cookie.getValue());
             }
 
             return next.handle(builder.build());
