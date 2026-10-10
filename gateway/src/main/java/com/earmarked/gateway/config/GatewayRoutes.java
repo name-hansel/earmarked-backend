@@ -35,32 +35,18 @@ public class GatewayRoutes {
 
     @Bean
     public RouterFunction<ServerResponse> authServiceRoute() {
-        return route("auth-login")
-                .route(path(ApiPaths.LOGIN), http())
-                .before(uri(serviceBaseUrlProperties.auth()))
-                .after(setAuthCookies())
-                .build()
-                .and(route("auth-refresh").route(path(ApiPaths.REFRESH), http())
-                        .filter(validateAndTranslateRefreshToken())
-                        .before(uri(serviceBaseUrlProperties.auth()))
-                        .after(setAuthCookies())
-                        .build())
-                .and(route("auth-logout-delete-account-change-password").route(
-                                path(ApiPaths.LOGOUT).or(path(ApiPaths.DELETE_ACCOUNT)),
-                                http())
-                        .filter(validateAndTranslateAccessToken())
-                        .filter(validateAndTranslateRefreshToken())
-                        .before(uri(serviceBaseUrlProperties.auth()))
-                        .after(clearAuthCookies())
-                        .build())
+        return route("auth-login").route(path(ApiPaths.LOGIN), http()).before(uri(serviceBaseUrlProperties.auth()))
+                .after(setAuthCookies()).build().and(route("auth-refresh").route(path(ApiPaths.REFRESH), http())
+                        .filter(validateAndTranslateRefreshToken()).before(uri(serviceBaseUrlProperties.auth()))
+                        .after(setAuthCookies()).build()).and(route("auth-logout-delete-account-change-password").route(
+                                path(ApiPaths.LOGOUT).or(path(ApiPaths.DELETE_ACCOUNT)), http())
+                        .filter(validateAndTranslateAccessToken()).filter(validateAndTranslateRefreshToken())
+                        .before(uri(serviceBaseUrlProperties.auth())).after(clearAuthCookies()).build())
                 .and(route("auth-change-password").route(path(ApiPaths.CHANGE_PASSWORD), http())
-                        .filter(validateAndTranslateAccessToken())
-                        .filter(validateAndTranslateRefreshToken())
-                        .before(uri(serviceBaseUrlProperties.auth()))
-                        .build())
+                        .filter(validateAndTranslateAccessToken()).filter(validateAndTranslateRefreshToken())
+                        .before(uri(serviceBaseUrlProperties.auth())).build())
                 .and(route("auth-generic").route(path(ApiPaths.AUTH_WILDCARD), http())
-                        .filter(validateAndTranslateAccessToken())
-                        .before(uri(serviceBaseUrlProperties.auth()))
+                        .filter(validateAndTranslateAccessToken()).before(uri(serviceBaseUrlProperties.auth()))
                         .build());
     }
 
@@ -85,11 +71,10 @@ public class GatewayRoutes {
                 }
             }
 
-            ServerRequest.Builder builder = ServerRequest.from(request)
-                    .headers(headers -> {
-                        headers.remove(HttpHeaders.COOKIE);
-                        headers.remove(cookieHeaderName);
-                    });
+            ServerRequest.Builder builder = ServerRequest.from(request).headers(headers -> {
+                headers.remove(HttpHeaders.COOKIE);
+                headers.remove(cookieHeaderName);
+            });
 
             if (cookie != null) {
                 builder.header(cookieHeaderName, cookieValuePrefix + cookie.getValue());
@@ -114,18 +99,15 @@ public class GatewayRoutes {
 
             if (authHeader != null && authHeader.startsWith(JwtConfiguration.BEARER_PREFIX)) {
                 String accessToken = authHeader.substring(JwtConfiguration.BEARER_PREFIX.length());
-                Duration maxAge = Duration.between(Instant.now(), jwtService.extractExpiration(accessToken));
                 headers.add(HttpHeaders.SET_COOKIE,
-                        buildCookie(JwtConfiguration.TokenType.accessToken(), accessToken,
-                                ACCESS_TOKEN_COOKIE_PATH,
-                                maxAge).toString());
+                        buildCookie(JwtConfiguration.TokenType.accessToken(), accessToken, ACCESS_TOKEN_COOKIE_PATH,
+                                remainingTtl(accessToken)).toString());
             }
 
             if (refreshHeader != null) {
-                Duration maxAge = Duration.between(Instant.now(), jwtService.extractExpiration(refreshHeader));
                 headers.add(HttpHeaders.SET_COOKIE,
                         buildCookie(JwtConfiguration.TokenType.refreshToken(), refreshHeader, REFRESH_TOKEN_COOKIE_PATH,
-                                maxAge).toString());
+                                remainingTtl(refreshHeader)).toString());
             }
 
             return response;
@@ -161,7 +143,11 @@ public class GatewayRoutes {
     }
 
     private static ServerResponse getInvalidTokenServerResponse() {
-        return ServerResponse.status(HttpStatus.UNAUTHORIZED)
-                .body(new GatewayError("INVALID_TOKEN", "Invalid token"));
+        return ServerResponse.status(HttpStatus.UNAUTHORIZED).body(new GatewayError("INVALID_TOKEN", "Invalid token"));
+    }
+
+    private Duration remainingTtl(String token) {
+        Duration d = Duration.between(Instant.now(), jwtService.extractExpiration(token));
+        return d.isNegative() ? Duration.ZERO : d;
     }
 }
