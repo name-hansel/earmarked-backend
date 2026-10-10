@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
         Map<String, String> fieldErrors = exception.getBindingResult().getFieldErrors().stream().collect(
                 Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage,
                         (existing, replacement) -> existing));
-        ApiError error = new ApiError("VALIDATION_ERROR", "Request validation failed", fieldErrors);
+        ApiError error = new ApiError("VALIDATION_ERROR", null, fieldErrors);
 
         return ResponseEntity.badRequest().body(error);
     }
