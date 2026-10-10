@@ -138,13 +138,12 @@ public class GatewayRoutes {
                 return response;
             }
 
-            ServerResponse.BodyBuilder builder = ServerResponse.from(response);
-            builder.header(HttpHeaders.SET_COOKIE,
+            response.headers().add(HttpHeaders.SET_COOKIE,
                     clearCookie(JwtConfiguration.TokenType.accessToken(), ACCESS_TOKEN_COOKIE_PATH).toString());
-            builder.header(HttpHeaders.SET_COOKIE,
+            response.headers().add(HttpHeaders.SET_COOKIE,
                     clearCookie(JwtConfiguration.TokenType.refreshToken(), REFRESH_TOKEN_COOKIE_PATH).toString());
 
-            return builder.build();
+            return response;
         };
     }
 
