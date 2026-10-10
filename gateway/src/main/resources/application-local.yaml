@@ -1,2 +1,6 @@
 services:
   auth: http://localhost:8081
+
+gateway:
+  cors:
+    allowed-origin: http://localhost:5173
