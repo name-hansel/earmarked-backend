@@ -10,8 +10,8 @@ import org.springframework.web.client.RestClient;
 public class SpotifyConfiguration {
 
     @Bean
-    RestClient spotifyRestClient(RestClient.Builder builder, SpotifyProperties spotifyProperties, SpotifyTokenProvider spotifyTokenProvider) {
-        return builder
+    RestClient spotifyRestClient(SpotifyProperties spotifyProperties, SpotifyTokenProvider spotifyTokenProvider) {
+        return RestClient.builder()
                 .baseUrl(spotifyProperties.apiUrl())
                 .requestInterceptor((req, body, exec) -> {
                     req.getHeaders().setBearerAuth(spotifyTokenProvider.getToken());

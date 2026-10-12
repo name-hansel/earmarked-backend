@@ -15,9 +15,9 @@ public class SpotifyTokenProvider {
     private Instant expiresAt = Instant.EPOCH;
     private String token;
 
-    public SpotifyTokenProvider(SpotifyProperties spotifyProperties, RestClient.Builder builder) {
+    public SpotifyTokenProvider(SpotifyProperties spotifyProperties) {
         this.spotifyProperties = spotifyProperties;
-        this.restClient = builder.baseUrl(spotifyProperties.authUrl()).build();
+        this.restClient = RestClient.builder().baseUrl(spotifyProperties.authUrl()).build();
     }
 
     public synchronized String getToken() {
