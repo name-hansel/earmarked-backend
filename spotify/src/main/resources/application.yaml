@@ -1,0 +1,13 @@
+spring:
+  profiles:
+    active: local
+  application:
+    name: spotify
+server:
+  port: 8082
+spotify:
+  auth-url: https://accounts.spotify.com
+  api-url: https://api.spotify.com/v1
+logging:
+  level:
+    org.springframework.web: DEBUG
