@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-@RequestMapping(path = ApiPaths.AUTH)
+@RequestMapping(path = ApiPaths.BASE_API_URL)
 @RestController
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
