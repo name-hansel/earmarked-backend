@@ -4,12 +4,10 @@ import com.earmarked.spotify.config.ApiPaths;
 import com.earmarked.spotify.dto.Album;
 import com.earmarked.spotify.service.SpotifyService;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -24,5 +22,10 @@ public class SpotifyController {
     @GetMapping(ApiPaths.SEARCH)
     public List<Album> search(@RequestParam("q") @NotBlank String query) {
         return spotifyService.searchAlbums(query);
+    }
+
+    @GetMapping(ApiPaths.ALBUM)
+    public Album getAlbum(@PathVariable @Pattern(regexp = "^[A-Za-z0-9]{22}$", message = "Invalid album id") String id) {
+        return spotifyService.getAlbum(id);
     }
 }

@@ -1,5 +1,6 @@
 package com.earmarked.spotify.service;
 
+import com.earmarked.spotify.dto.spotify.SpotifyAlbum;
 import com.earmarked.spotify.dto.spotify.SpotifySearchResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -21,5 +22,12 @@ public class SpotifyClient {
                         .build())
                 .retrieve()
                 .body(SpotifySearchResponse.class);
+    }
+
+    public SpotifyAlbum getAlbum(String id) {
+        return spotifyRestClient.get()
+                .uri("/albums/{id}", id)
+                .retrieve()
+                .body(SpotifyAlbum.class);
     }
 }

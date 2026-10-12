@@ -28,6 +28,10 @@ public class SpotifyService {
         return searchResponse.albums().items().stream().filter(Objects::nonNull).map(this::toAlbum).toList();
     }
 
+    public Album getAlbum(String id) {
+        return toAlbum(spotifyClient.getAlbum(id));
+    }
+
     private Album toAlbum(SpotifyAlbum album) {
         List<String> artists = Optional.ofNullable(album.artists())
                 .map((spotifyArtists) -> spotifyArtists.stream().map(SpotifyArtist::name).toList())
