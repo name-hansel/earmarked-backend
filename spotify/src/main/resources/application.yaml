@@ -3,6 +3,10 @@ spring:
     active: local
   application:
     name: spotify
+  data:
+    redis:
+      host: localhost
+      port: ${spotify.redis.port}
 server:
   port: 8082
 spotify:
