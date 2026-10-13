@@ -50,6 +50,14 @@ public class GatewayRoutes {
                         .build());
     }
 
+    @Bean
+    public RouterFunction<ServerResponse> spotifyServiceRoute() {
+        return route("spotify")
+                .route(path(ApiPaths.SPOTIFY_WILDCARD), http())
+                .before(uri(serviceBaseUrlProperties.spotify()))
+                .build();
+    }
+
     private HandlerFilterFunction<ServerResponse, ServerResponse> validateAndTranslateAccessToken() {
         return tokenFilter(JwtConfiguration.TokenType.accessToken(), HttpHeaders.AUTHORIZATION,
                 JwtConfiguration.BEARER_PREFIX);
