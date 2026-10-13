@@ -1,4 +1,4 @@
-package com.earmarked.spotify.config;
+package com.earmarked.spotify.config.spotify;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

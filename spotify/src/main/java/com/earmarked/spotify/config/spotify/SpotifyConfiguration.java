@@ -1,4 +1,4 @@
-package com.earmarked.spotify.config;
+package com.earmarked.spotify.config.spotify;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +13,7 @@ public class SpotifyConfiguration {
     RestClient spotifyRestClient(SpotifyProperties spotifyProperties, SpotifyTokenProvider spotifyTokenProvider) {
         return RestClient.builder()
                 .baseUrl(spotifyProperties.apiUrl())
+                .requestFactory(SpotifyHttp.requestFactory())
                 .requestInterceptor((req, body, exec) -> {
                     req.getHeaders().setBearerAuth(spotifyTokenProvider.getToken());
                     return exec.execute(req, body);

@@ -1,4 +1,4 @@
-package com.earmarked.spotify.config;
+package com.earmarked.spotify.config.spotify;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.MediaType;
@@ -17,7 +17,8 @@ public class SpotifyTokenProvider {
 
     public SpotifyTokenProvider(SpotifyProperties spotifyProperties) {
         this.spotifyProperties = spotifyProperties;
-        this.restClient = RestClient.builder().baseUrl(spotifyProperties.authUrl()).build();
+        this.restClient = RestClient.builder().baseUrl(spotifyProperties.authUrl())
+                .requestFactory(SpotifyHttp.requestFactory()).build();
     }
 
     public synchronized String getToken() {
