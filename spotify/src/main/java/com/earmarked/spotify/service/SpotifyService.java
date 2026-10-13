@@ -1,10 +1,12 @@
 package com.earmarked.spotify.service;
 
+import com.earmarked.spotify.config.CacheConfig;
 import com.earmarked.spotify.dto.Album;
 import com.earmarked.spotify.dto.spotify.SpotifyAlbum;
 import com.earmarked.spotify.dto.spotify.SpotifyArtist;
 import com.earmarked.spotify.dto.spotify.SpotifySearchResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -18,6 +20,7 @@ public class SpotifyService {
 
     private final SpotifyClient spotifyClient;
 
+    @Cacheable(value = CacheConfig.ALBUM_SEARCH, key = "#query.trim().toLowerCase()")
     public List<Album> searchAlbums(String query) {
         SpotifySearchResponse searchResponse = spotifyClient.searchAlbums(query);
 
@@ -28,6 +31,7 @@ public class SpotifyService {
         return searchResponse.albums().items().stream().filter(Objects::nonNull).map(this::toAlbum).toList();
     }
 
+    @Cacheable(value = CacheConfig.ALBUMS, key = "#id")
     public Album getAlbum(String id) {
         return toAlbum(spotifyClient.getAlbum(id));
     }
