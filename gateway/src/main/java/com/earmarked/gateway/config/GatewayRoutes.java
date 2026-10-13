@@ -55,6 +55,8 @@ public class GatewayRoutes {
         return route("spotify")
                 .route(path(ApiPaths.SPOTIFY_WILDCARD), http())
                 .before(uri(serviceBaseUrlProperties.spotify()))
+                .filter(requireAccessToken())
+                .filter(validateAndTranslateAccessToken())
                 .build();
     }
 
@@ -89,6 +91,17 @@ public class GatewayRoutes {
             }
 
             return next.handle(builder.build());
+        };
+    }
+
+    private HandlerFilterFunction<ServerResponse, ServerResponse> requireAccessToken() {
+        return (request, next) -> {
+            if (request.cookies().getFirst(JwtConfiguration.TokenType.accessToken()) == null) {
+                return ServerResponse.status(HttpStatus.UNAUTHORIZED)
+                        .body(new GatewayError("MISSING_TOKEN", "Authentication required"));
+            }
+
+            return next.handle(request);
         };
     }
 
