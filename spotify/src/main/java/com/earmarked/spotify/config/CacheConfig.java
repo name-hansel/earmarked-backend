@@ -1,6 +1,7 @@
 package com.earmarked.spotify.config;
 
-import com.earmarked.spotify.dto.Album;
+import com.earmarked.spotify.dto.AlbumDetails;
+import com.earmarked.spotify.dto.AlbumSummary;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,10 +24,10 @@ public class CacheConfig {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory, JsonMapper jsonMapper) {
-        JacksonJsonRedisSerializer<Album> albumSerializer = new JacksonJsonRedisSerializer<>(jsonMapper,
-                Album.class);
+        JacksonJsonRedisSerializer<AlbumDetails> albumSerializer = new JacksonJsonRedisSerializer<>(jsonMapper,
+                AlbumDetails.class);
 
-        CollectionType searchType = jsonMapper.getTypeFactory().constructCollectionType(List.class, Album.class);
+        CollectionType searchType = jsonMapper.getTypeFactory().constructCollectionType(List.class, AlbumSummary.class);
         JacksonJsonRedisSerializer<Object> searchSerializer = new JacksonJsonRedisSerializer<>(
                 jsonMapper, searchType);
 

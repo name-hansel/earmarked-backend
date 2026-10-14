@@ -1,10 +1,9 @@
 package com.earmarked.spotify.service;
 
 import com.earmarked.spotify.config.CacheConfig;
-import com.earmarked.spotify.dto.Album;
-import com.earmarked.spotify.dto.spotify.SpotifyAlbum;
-import com.earmarked.spotify.dto.spotify.SpotifyArtist;
-import com.earmarked.spotify.dto.spotify.SpotifySearchResponse;
+import com.earmarked.spotify.dto.AlbumDetails;
+import com.earmarked.spotify.dto.AlbumSummary;
+import com.earmarked.spotify.dto.spotify.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -21,27 +20,51 @@ public class SpotifyService {
     private final SpotifyClient spotifyClient;
 
     @Cacheable(value = CacheConfig.ALBUM_SEARCH, key = "#query.trim().toLowerCase()")
-    public List<Album> searchAlbums(String query) {
+    public List<AlbumSummary> searchAlbums(String query) {
         SpotifySearchResponse searchResponse = spotifyClient.searchAlbums(query);
 
         if (searchResponse == null || searchResponse.albums() == null || searchResponse.albums().items() == null) {
             return List.of();
         }
 
-        return searchResponse.albums().items().stream().filter(Objects::nonNull).map(this::toAlbum).toList();
+        return searchResponse.albums().items().stream().filter(Objects::nonNull).map(this::toSummary).toList();
     }
 
     @Cacheable(value = CacheConfig.ALBUMS, key = "#id")
-    public Album getAlbum(String id) {
-        return toAlbum(spotifyClient.getAlbum(id));
+    public AlbumDetails getAlbum(String id) {
+        return toDetails(spotifyClient.getAlbum(id));
     }
 
-    private Album toAlbum(SpotifyAlbum album) {
-        List<String> artists = Optional.ofNullable(album.artists())
-                .map((spotifyArtists) -> spotifyArtists.stream().map(SpotifyArtist::name).toList())
-                .orElse(List.of());
-        String imageUrl = CollectionUtils.isEmpty(album.images()) ? null : album.images().getFirst().url();
+    private AlbumSummary toSummary(SpotifyAlbum album) {
+        return new AlbumSummary(album.id(), album.name(), getArtists(album),
+                CollectionUtils.isEmpty(album.images()) ? null : album.images().getLast().url(), album.releaseDate(),
+                album.albumType());
+    }
 
-        return new Album(album.id(), album.name(), artists, imageUrl, album.releaseDate());
+    private AlbumDetails toDetails(SpotifyAlbum album) {
+        List<TrackDetails> tracks = (album.tracks() == null || album.tracks().items() == null)
+                ? List.of()
+                : album.tracks().items().stream()
+                .filter(Objects::nonNull)
+                .map(this::getTrackDetails)
+                .toList();
+
+        return new AlbumDetails(album.id(), album.name(), getArtists(album),
+                CollectionUtils.isEmpty(album.images()) ? null : album.images().getFirst().url(), album.releaseDate(),
+                album.totalTracks(), album.albumType(), tracks);
+    }
+
+    private TrackDetails getTrackDetails(SpotifyTrack track) {
+        return new TrackDetails(track.id(), track.name(), track.trackNumber(), track.durationMs(), getArtists(track));
+    }
+
+    private List<String> getArtists(SpotifyTrack track) {
+        return Optional.ofNullable(track.artists())
+                .map((spotifyArtists) -> spotifyArtists.stream().map(SpotifyArtist::name).toList()).orElse(List.of());
+    }
+
+    private List<String> getArtists(SpotifyAlbum album) {
+        return Optional.ofNullable(album.artists())
+                .map((spotifyArtists) -> spotifyArtists.stream().map(SpotifyArtist::name).toList()).orElse(List.of());
     }
 }
