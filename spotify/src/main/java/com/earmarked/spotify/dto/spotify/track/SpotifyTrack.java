@@ -1,5 +1,6 @@
-package com.earmarked.spotify.dto.spotify;
+package com.earmarked.spotify.dto.spotify.track;
 
+import com.earmarked.spotify.dto.spotify.SpotifyArtist;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 

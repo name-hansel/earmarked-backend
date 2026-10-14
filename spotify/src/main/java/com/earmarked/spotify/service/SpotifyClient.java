@@ -1,7 +1,7 @@
 package com.earmarked.spotify.service;
 
-import com.earmarked.spotify.dto.spotify.SpotifyAlbum;
 import com.earmarked.spotify.dto.spotify.SpotifySearchResponse;
+import com.earmarked.spotify.dto.spotify.album.SpotifyAlbumFull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -27,11 +27,11 @@ public class SpotifyClient {
                 .body(SpotifySearchResponse.class);
     }
 
-    public SpotifyAlbum getAlbum(String id) {
+    public SpotifyAlbumFull getAlbum(String id) {
         log.info("Calling Spotify: GET /albums/{}", id);
         return spotifyRestClient.get()
                 .uri("/albums/{id}", id)
                 .retrieve()
-                .body(SpotifyAlbum.class);
+                .body(SpotifyAlbumFull.class);
     }
 }

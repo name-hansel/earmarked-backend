@@ -1,4 +1,4 @@
-package com.earmarked.spotify.dto.spotify;
+package com.earmarked.spotify.dto;
 
 import java.util.List;
 

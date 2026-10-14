@@ -3,7 +3,13 @@ package com.earmarked.spotify.service;
 import com.earmarked.spotify.config.CacheConfig;
 import com.earmarked.spotify.dto.AlbumDetails;
 import com.earmarked.spotify.dto.AlbumSummary;
-import com.earmarked.spotify.dto.spotify.*;
+import com.earmarked.spotify.dto.TrackDetails;
+import com.earmarked.spotify.dto.spotify.SpotifyArtist;
+import com.earmarked.spotify.dto.spotify.SpotifySearchResponse;
+import com.earmarked.spotify.dto.spotify.album.SpotifyAlbum;
+import com.earmarked.spotify.dto.spotify.album.SpotifyAlbumData;
+import com.earmarked.spotify.dto.spotify.album.SpotifyAlbumFull;
+import com.earmarked.spotify.dto.spotify.track.SpotifyTrack;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -41,7 +47,7 @@ public class SpotifyService {
                 album.albumType());
     }
 
-    private AlbumDetails toDetails(SpotifyAlbum album) {
+    private AlbumDetails toDetails(SpotifyAlbumFull album) {
         List<TrackDetails> tracks = (album.tracks() == null || album.tracks().items() == null)
                 ? List.of()
                 : album.tracks().items().stream()
@@ -63,7 +69,7 @@ public class SpotifyService {
                 .map((spotifyArtists) -> spotifyArtists.stream().map(SpotifyArtist::name).toList()).orElse(List.of());
     }
 
-    private List<String> getArtists(SpotifyAlbum album) {
+    private List<String> getArtists(SpotifyAlbumData album) {
         return Optional.ofNullable(album.artists())
                 .map((spotifyArtists) -> spotifyArtists.stream().map(SpotifyArtist::name).toList()).orElse(List.of());
     }
