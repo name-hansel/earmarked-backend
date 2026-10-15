@@ -1,0 +1,20 @@
+server:
+  port: 8083
+spring:
+  profiles:
+    active: local
+  application:
+    name: earmarked
+  datasource:
+    url: jdbc:postgresql://localhost:${earmarked.db.port}/${earmarked.db.name}
+    username: ${earmarked.db.username}
+    password: ${earmarked.db.password}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG

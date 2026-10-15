@@ -11,6 +11,18 @@ services:
     volumes:
       - authentication-db-data:/var/lib/postgresql/data
 
+  earmarked-db:
+    image: postgres:17
+    container_name: earmarked-db
+    environment:
+      POSTGRES_DB: ${EARMARKED_DB}
+      POSTGRES_USER: ${EARMARKED_DB_USERNAME}
+      POSTGRES_PASSWORD: ${EARMARKED_DB_PASSWORD}
+    ports:
+      - "${EARMARKED_DB_PORT}:5432"
+    volumes:
+      - earmarked-db-data:/var/lib/postgresql/data
+
   authentication_redis:
     image: redis:8
     container_name: authentication-redis
@@ -30,5 +42,6 @@ services:
 
 volumes:
   authentication-db-data:
+  earmarked-db-data:
   authentication-redis-data:
   spotify-redis-data:
