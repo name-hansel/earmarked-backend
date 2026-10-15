@@ -4,11 +4,11 @@ spring:
   profiles:
     active: local
   application:
-    name: earmarked
+    name: earmark
   datasource:
-    url: jdbc:postgresql://localhost:${earmarked.db.port}/${earmarked.db.name}
-    username: ${earmarked.db.username}
-    password: ${earmarked.db.password}
+    url: jdbc:postgresql://localhost:${earmark.db.port}/${earmark.db.name}
+    username: ${earmark.db.username}
+    password: ${earmark.db.password}
   jpa:
     hibernate:
       ddl-auto: validate

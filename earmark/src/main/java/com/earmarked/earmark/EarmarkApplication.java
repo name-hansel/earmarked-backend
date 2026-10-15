@@ -1,13 +1,13 @@
-package com.earmarked.earmarked;
+package com.earmarked.earmark;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class EarmarkedApplication {
+public class EarmarkApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(EarmarkedApplication.class, args);
+		SpringApplication.run(EarmarkApplication.class, args);
 	}
 
 }

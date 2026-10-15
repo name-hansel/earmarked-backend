@@ -1,10 +1,10 @@
-package com.earmarked.earmarked;
+package com.earmarked.earmark;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class EarmarkedApplicationTests {
+class EarmarkApplicationTests {
 
 	@Test
 	void contextLoads() {
