@@ -1,3 +1,4 @@
+*.pem
 application-local.yaml
 HELP.md
 target/
