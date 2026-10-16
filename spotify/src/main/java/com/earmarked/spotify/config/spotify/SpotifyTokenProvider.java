@@ -1,6 +1,7 @@
 package com.earmarked.spotify.config.spotify;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -9,6 +10,7 @@ import org.springframework.web.client.RestClient;
 import java.time.Instant;
 
 @Component
+@EnableConfigurationProperties(SpotifyProperties.class)
 public class SpotifyTokenProvider {
     private final RestClient restClient;
     private final SpotifyProperties spotifyProperties;

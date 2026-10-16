@@ -1,4 +1,11 @@
 spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          spotify-api:
+            connect-timeout: 2000
+            read-timeout: 5000
   profiles:
     active: local
   application:
