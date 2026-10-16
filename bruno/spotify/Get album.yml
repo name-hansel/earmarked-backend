@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{api_url}}/api/spotify/albums/1VfncK0Rpng2xCmfkKfO7N"
+  url: "{{api_url}}/api/spotify/albums/5bVJC9KPcUvQPcibNpjAk9"
   auth: inherit
 
 settings:

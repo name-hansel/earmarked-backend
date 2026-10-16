@@ -5,10 +5,10 @@ info:
 
 http:
   method: GET
-  url: "{{api_url}}/api/spotify/albums/search?q=the great divide"
+  url: "{{api_url}}/api/spotify/albums/search?q=morbid stuff"
   params:
     - name: q
-      value: the great divide
+      value: morbid stuff
       type: query
   auth: inherit
 

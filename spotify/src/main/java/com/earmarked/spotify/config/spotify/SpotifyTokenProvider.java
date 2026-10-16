@@ -1,26 +1,26 @@
 package com.earmarked.spotify.config.spotify;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.earmarked.spotify.dto.spotify.auth.SpotifyTokenResponse;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.web.client.RestClient;
+import org.springframework.util.MultiValueMap;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Base64;
 
 @Component
 @EnableConfigurationProperties(SpotifyProperties.class)
 public class SpotifyTokenProvider {
-    private final RestClient restClient;
+    private final SpotifyAuthApi spotifyAuthApi;
     private final SpotifyProperties spotifyProperties;
     private Instant expiresAt = Instant.EPOCH;
     private String token;
 
-    public SpotifyTokenProvider(SpotifyProperties spotifyProperties) {
+    public SpotifyTokenProvider(SpotifyAuthApi spotifyAuthApi, SpotifyProperties spotifyProperties) {
+        this.spotifyAuthApi = spotifyAuthApi;
         this.spotifyProperties = spotifyProperties;
-        this.restClient = RestClient.builder().baseUrl(spotifyProperties.authUrl())
-                .requestFactory(SpotifyHttp.requestFactory()).build();
     }
 
     public synchronized String getToken() {
@@ -32,22 +32,17 @@ public class SpotifyTokenProvider {
     }
 
     private void refresh() {
-        var form = new LinkedMultiValueMap<String, String>();
+        String credentials = spotifyProperties.clientId() + ":" + spotifyProperties.clientSecret();
+        String basicAuth = "Basic " + Base64.getEncoder()
+                .encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("grant_type", "client_credentials");
 
-        TokenResponse tokenResponse = restClient.post().uri("/api/token")
-                .headers(h -> h.setBasicAuth(spotifyProperties.clientId(), spotifyProperties.clientSecret()))
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(form)
-                .retrieve()
-                .body(TokenResponse.class);
+        SpotifyTokenResponse spotifyTokenResponse = spotifyAuthApi.requestToken(basicAuth, form);
 
-        assert tokenResponse != null;
-        token = tokenResponse.accessToken();
-        expiresAt = Instant.now().plusSeconds(tokenResponse.expiresIn());
-    }
-
-    private record TokenResponse(@JsonProperty("access_token") String accessToken,
-                                 @JsonProperty("expires_in") long expiresIn) {
+        assert spotifyTokenResponse != null;
+        token = spotifyTokenResponse.accessToken();
+        expiresAt = Instant.now().plusSeconds(spotifyTokenResponse.expiresIn());
     }
 }
