@@ -22,6 +22,10 @@ server:
 spotify:
   auth-url: https://accounts.spotify.com
   api-url: https://api.spotify.com/v1
+eureka:
+  client:
+    service-url:
+      defaultZone: ${eureka.defaultZone}
 logging:
   level:
     org.springframework.web: DEBUG

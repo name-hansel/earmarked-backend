@@ -18,6 +18,10 @@ spring:
       ddl-auto: validate
   flyway:
     enabled: true
+eureka:
+  client:
+    service-url:
+      defaultZone: ${eureka.defaultZone}
 logging:
   level:
     org.springframework.security: DEBUG
