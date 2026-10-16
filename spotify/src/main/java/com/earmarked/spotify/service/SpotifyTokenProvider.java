@@ -1,5 +1,7 @@
-package com.earmarked.spotify.config.spotify;
+package com.earmarked.spotify.service;
 
+import com.earmarked.spotify.config.spotify.SpotifyAuthApi;
+import com.earmarked.spotify.config.spotify.SpotifyProperties;
 import com.earmarked.spotify.dto.spotify.auth.SpotifyTokenResponse;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;

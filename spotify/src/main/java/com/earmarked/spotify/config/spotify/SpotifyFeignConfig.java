@@ -1,5 +1,6 @@
 package com.earmarked.spotify.config.spotify;
 
+import com.earmarked.spotify.service.SpotifyTokenProvider;
 import feign.RequestInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;

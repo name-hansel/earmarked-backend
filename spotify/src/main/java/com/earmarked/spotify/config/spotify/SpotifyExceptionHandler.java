@@ -1,6 +1,7 @@
 package com.earmarked.spotify.config.spotify;
 
 import com.earmarked.spotify.dto.ApiError;
+import feign.FeignException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -9,8 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
+
+import java.util.List;
 
 @RestControllerAdvice
 @Slf4j
@@ -23,24 +24,25 @@ public class SpotifyExceptionHandler {
         return ResponseEntity.badRequest().body(new ApiError("VALIDATION_ERROR", message));
     }
 
-    @ExceptionHandler(HttpClientErrorException.NotFound.class)
-    public ResponseEntity<ApiError> handleNotFound(HttpClientErrorException.NotFound e) {
+    @ExceptionHandler(FeignException.NotFound.class)
+    public ResponseEntity<ApiError> handleNotFound(FeignException.NotFound e) {
         return ResponseEntity.badRequest().body(new ApiError("ALBUM_NOT_FOUND", "Album not found"));
     }
 
-    @ExceptionHandler(HttpClientErrorException.TooManyRequests.class)
-    public ResponseEntity<ApiError> handleRateLimit(HttpClientErrorException.TooManyRequests ex) {
-        var retryAfter = ex.getResponseHeaders() == null ? null
-                : ex.getResponseHeaders().getFirst(HttpHeaders.RETRY_AFTER);
-        var response = ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS);
+    @ExceptionHandler(FeignException.TooManyRequests.class)
+    public ResponseEntity<ApiError> handleRateLimit(FeignException.TooManyRequests ex) {
+        log.warn("Spotify rate limit hit");
+        var response = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
 
-        if (retryAfter != null) response.header(HttpHeaders.RETRY_AFTER, retryAfter);
+        ex.responseHeaders().getOrDefault(HttpHeaders.RETRY_AFTER, List.of()).stream()
+                .findFirst()
+                .ifPresent(retryAfter -> response.header(HttpHeaders.RETRY_AFTER, retryAfter));
 
         return response.body(new ApiError("RATE_LIMITED", "Too many requests, try again later"));
     }
 
-    @ExceptionHandler(RestClientException.class)
-    public ResponseEntity<ApiError> handleSpotifyFailure(RestClientException ex) {
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<ApiError> handleSpotifyFailure(FeignException ex) {
         log.error("Spotify call failed", ex);
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                 .body(new ApiError("SPOTIFY_UNAVAILABLE", "Spotify is unavailable"));
