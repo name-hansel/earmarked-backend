@@ -1,0 +1,20 @@
+info:
+  name: Search albums
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{api_url}}/api/spotify/albums/search?q=dopamine fontaines"
+  params:
+    - name: q
+      value: dopamine fontaines
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

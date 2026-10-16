@@ -1,0 +1,23 @@
+info:
+  name: create earmark
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{api_url}}/api/earmark"
+  body:
+    type: json
+    data: |-
+      {
+        "spotifyAlbumId": "0JICUfSKOdGqzE9FJSrNci",
+        "note": "NEW FONTAINES DC ALBUM!!"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
