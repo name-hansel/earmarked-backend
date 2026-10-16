@@ -51,11 +51,20 @@ public class GatewayRoutes {
     }
 
     @Bean
-    public RouterFunction<ServerResponse> spotifyServiceRoute() {
+    public RouterFunction<ServerResponse> spotifyServiceRoutes() {
         return route("spotify")
                 .route(path(ApiPaths.SPOTIFY_WILDCARD), http())
                 .before(uri(serviceBaseUrlProperties.spotify()))
                 .filter(requireAccessToken())
+                .filter(validateAndTranslateAccessToken())
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> earmarkServiceRoutes() {
+        return route("earmark")
+                .route(path(ApiPaths.EARMARK_WILDCARD), http())
+                .before(uri(serviceBaseUrlProperties.earmark()))
                 .filter(validateAndTranslateAccessToken())
                 .build();
     }
