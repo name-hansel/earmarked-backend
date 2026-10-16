@@ -3,6 +3,7 @@ package com.earmarked.earmark.config;
 import com.earmarked.earmark.dto.ApiError;
 import com.earmarked.earmark.exception.ApiException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -21,6 +22,12 @@ public class EarmarkExceptionHandler {
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiError> handleApiException(ApiException e) {
         return ResponseEntity.status(e.getStatus()).body(new ApiError(e.getCode(), e.getMessage(), Map.of()));
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<ApiError> handleInvalidSort(PropertyReferenceException e) {
+        return ResponseEntity.badRequest()
+                .body(new ApiError("INVALID_SORT", "Invalid sort property", Map.of()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

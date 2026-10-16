@@ -6,13 +6,14 @@ import com.earmarked.earmark.dto.EarmarkResponse;
 import com.earmarked.earmark.service.EarmarkService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -26,4 +27,10 @@ public class EarmarkController {
     public ResponseEntity<EarmarkResponse> create(@AuthenticationPrincipal UUID userId, @Valid @RequestBody CreateEarmarkRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(earmarkService.create(userId, request));
     }
+
+    @GetMapping
+    public Page<EarmarkResponse> getAll(@AuthenticationPrincipal UUID userId, @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return earmarkService.getAll(userId, pageable);
+    }
+
 }
