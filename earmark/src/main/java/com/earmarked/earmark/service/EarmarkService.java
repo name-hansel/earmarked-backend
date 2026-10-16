@@ -7,6 +7,7 @@ import com.earmarked.earmark.exception.EarmarkAlreadyExistsException;
 import com.earmarked.earmark.repository.EarmarkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ import java.util.UUID;
 public class EarmarkService {
     private final EarmarkRepository repository;
 
+    @Transactional
     public EarmarkResponse create(UUID userId, CreateEarmarkRequest request) {
         if (repository.existsByUserIdAndSpotifyAlbumId(userId, request.spotifyAlbumId())) {
             throw new EarmarkAlreadyExistsException();
