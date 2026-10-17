@@ -1,5 +1,6 @@
 package com.earmarked.earmark.service;
 
+import com.earmarked.earmark.client.SpotifyServiceClient;
 import com.earmarked.earmark.dto.CreateEarmarkRequest;
 import com.earmarked.earmark.dto.EarmarkResponse;
 import com.earmarked.earmark.entity.Earmark;
@@ -17,16 +18,20 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EarmarkService {
     private final EarmarkRepository repository;
+    private final SpotifyServiceClient spotifyServiceClient;
 
     @Transactional
     public EarmarkResponse create(UUID userId, CreateEarmarkRequest request) {
-        if (repository.existsByUserIdAndSpotifyAlbumId(userId, request.spotifyAlbumId())) {
+        String spotifyAlbumId = request.spotifyAlbumId();
+        spotifyServiceClient.getAlbum(spotifyAlbumId);
+
+        if (repository.existsByUserIdAndSpotifyAlbumId(userId, spotifyAlbumId)) {
             throw new EarmarkAlreadyExistsException();
         }
 
         Earmark earmark = new Earmark();
         earmark.setUserId(userId);
-        earmark.setSpotifyAlbumId(request.spotifyAlbumId());
+        earmark.setSpotifyAlbumId(spotifyAlbumId);
         earmark.setNote(request.note());
 
         return EarmarkResponse.from(repository.save(earmark));
