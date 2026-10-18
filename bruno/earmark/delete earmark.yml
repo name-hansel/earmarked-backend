@@ -1,0 +1,16 @@
+info:
+  name: delete earmark
+  type: http
+  seq: 2
+
+http:
+  method: DELETE
+  url: "{{api_url}}/api/earmark/ed2c92e1-abb9-405f-9d1c-4aa19fc45f8f"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

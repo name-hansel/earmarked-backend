@@ -5,6 +5,7 @@ import com.earmarked.earmark.dto.CreateEarmarkRequest;
 import com.earmarked.earmark.dto.EarmarkResponse;
 import com.earmarked.earmark.entity.Earmark;
 import com.earmarked.earmark.exception.EarmarkAlreadyExistsException;
+import com.earmarked.earmark.exception.EarmarkNotFoundException;
 import com.earmarked.earmark.repository.EarmarkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -40,6 +41,13 @@ public class EarmarkService {
     @Transactional(readOnly = true)
     public Page<EarmarkResponse> getAll(UUID userId, Pageable pageable) {
         return repository.findByUserId(userId, pageable).map(EarmarkResponse::from);
+    }
+
+    @Transactional
+    public void delete(UUID id, UUID userId) {
+        if (repository.deleteByIdAndUserId(id, userId) == 0) {
+            throw new EarmarkNotFoundException();
+        }
     }
 
     private boolean isAlreadyEarmarked(DataIntegrityViolationException e) {

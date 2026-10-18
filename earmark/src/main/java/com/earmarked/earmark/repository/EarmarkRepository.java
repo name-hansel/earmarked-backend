@@ -11,4 +11,6 @@ public interface EarmarkRepository extends JpaRepository<Earmark, UUID> {
     boolean existsByUserIdAndSpotifyAlbumId(UUID userId, String spotifyAlbumId);
 
     Page<Earmark> findByUserId(UUID userId, Pageable pageable);
+
+    long deleteByIdAndUserId(UUID id, UUID userId);
 }

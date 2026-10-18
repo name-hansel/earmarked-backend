@@ -33,4 +33,10 @@ public class EarmarkController {
         return earmarkService.getAll(userId, pageable);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@AuthenticationPrincipal UUID userId, @PathVariable UUID id) {
+        earmarkService.delete(id, userId);
+        
+        return ResponseEntity.noContent().build();
+    }
 }
