@@ -4,7 +4,6 @@ import com.earmarked.earmark.config.client.SpotifyClient;
 import com.earmarked.earmark.dto.CreateEarmarkRequest;
 import com.earmarked.earmark.dto.EarmarkResponse;
 import com.earmarked.earmark.entity.Earmark;
-import com.earmarked.earmark.exception.EarmarkAlreadyExistsException;
 import com.earmarked.earmark.repository.EarmarkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,24 +16,15 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class EarmarkService {
-    private final EarmarkRepository repository;
     private final SpotifyClient spotifyClient;
+    private final EarmarkWriter writer;
+    private final EarmarkRepository repository;
 
-    @Transactional
     public EarmarkResponse create(UUID userId, CreateEarmarkRequest request) {
-        String spotifyAlbumId = request.spotifyAlbumId();
-        spotifyClient.ensureValidAlbumId(spotifyAlbumId);
+        spotifyClient.ensureValidAlbumId(request.spotifyAlbumId());
+        Earmark saved = writer.save(userId, request);
 
-        if (repository.existsByUserIdAndSpotifyAlbumId(userId, spotifyAlbumId)) {
-            throw new EarmarkAlreadyExistsException();
-        }
-
-        Earmark earmark = new Earmark();
-        earmark.setUserId(userId);
-        earmark.setSpotifyAlbumId(spotifyAlbumId);
-        earmark.setNote(request.note());
-
-        return EarmarkResponse.from(repository.save(earmark));
+        return EarmarkResponse.from(saved);
     }
 
     @Transactional(readOnly = true)
