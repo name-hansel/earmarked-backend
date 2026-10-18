@@ -2,6 +2,8 @@ package com.earmarked.earmark.config;
 
 import com.earmarked.earmark.dto.ApiError;
 import com.earmarked.earmark.exception.ApiException;
+import com.earmarked.earmark.exception.album.AlbumServiceUnavailableException;
+import feign.RetryableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
@@ -45,6 +47,11 @@ public class EarmarkExceptionHandler {
         ApiError error = new ApiError("INVALID_REQUEST", "Request body is missing or malformed", Map.of());
 
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(RetryableException.class)
+    public ResponseEntity<ApiError> handleRetryable(RetryableException e) {
+        return handleApiException(new AlbumServiceUnavailableException());
     }
 
     @ExceptionHandler(Exception.class)
