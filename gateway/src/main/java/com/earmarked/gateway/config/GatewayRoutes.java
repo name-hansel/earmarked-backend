@@ -2,10 +2,10 @@ package com.earmarked.gateway.config;
 
 import com.earmarked.gateway.config.jwt.JwtConfiguration;
 import com.earmarked.gateway.config.jwt.JwtService;
-import com.earmarked.gateway.config.services.ServiceBaseUrlProperties;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.server.Cookie;
+import org.springframework.cloud.gateway.server.mvc.filter.LoadBalancerFilterFunctions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -22,7 +22,6 @@ import java.util.function.BiFunction;
 
 import static com.earmarked.gateway.config.jwt.JwtConfiguration.ACCESS_TOKEN_COOKIE_PATH;
 import static com.earmarked.gateway.config.jwt.JwtConfiguration.REFRESH_TOKEN_COOKIE_PATH;
-import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.uri;
 import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions.route;
 import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
 import static org.springframework.cloud.gateway.server.mvc.predicate.GatewayRequestPredicates.path;
@@ -30,23 +29,39 @@ import static org.springframework.cloud.gateway.server.mvc.predicate.GatewayRequ
 @Configuration
 @RequiredArgsConstructor
 public class GatewayRoutes {
-    private final ServiceBaseUrlProperties serviceBaseUrlProperties;
     private final JwtService jwtService;
 
     @Bean
     public RouterFunction<ServerResponse> authServiceRoute() {
-        return route("auth-login").route(path(ApiPaths.LOGIN), http()).before(uri(serviceBaseUrlProperties.auth()))
-                .after(setAuthCookies()).build().and(route("auth-refresh").route(path(ApiPaths.REFRESH), http())
-                        .filter(validateAndTranslateRefreshToken()).before(uri(serviceBaseUrlProperties.auth()))
-                        .after(setAuthCookies()).build()).and(route("auth-logout-delete-account-change-password").route(
-                                path(ApiPaths.LOGOUT).or(path(ApiPaths.DELETE_ACCOUNT)), http())
-                        .filter(validateAndTranslateAccessToken()).filter(validateAndTranslateRefreshToken())
-                        .before(uri(serviceBaseUrlProperties.auth())).after(clearAuthCookies()).build())
-                .and(route("auth-change-password").route(path(ApiPaths.CHANGE_PASSWORD), http())
-                        .filter(validateAndTranslateAccessToken()).filter(validateAndTranslateRefreshToken())
-                        .before(uri(serviceBaseUrlProperties.auth())).build())
-                .and(route("auth-generic").route(path(ApiPaths.AUTH_WILDCARD), http())
-                        .filter(validateAndTranslateAccessToken()).before(uri(serviceBaseUrlProperties.auth()))
+        return route("auth-login")
+                .route(path(ApiPaths.LOGIN), http())
+                .after(setAuthCookies())
+                .filter(LoadBalancerFilterFunctions.lb(ServiceNames.AUTHENTICATION))
+                .build()
+                .and(route("auth-refresh")
+                        .route(path(ApiPaths.REFRESH), http())
+                        .filter(validateAndTranslateRefreshToken())
+                        .after(setAuthCookies())
+                        .filter(LoadBalancerFilterFunctions.lb(ServiceNames.AUTHENTICATION))
+                        .build())
+                .and(route("auth-logout-delete-account")
+                        .route(path(ApiPaths.LOGOUT)
+                                .or(path(ApiPaths.DELETE_ACCOUNT)), http())
+                        .filter(validateAndTranslateAccessToken())
+                        .filter(validateAndTranslateRefreshToken())
+                        .after(clearAuthCookies())
+                        .filter(LoadBalancerFilterFunctions.lb(ServiceNames.AUTHENTICATION))
+                        .build())
+                .and(route("auth-change-password")
+                        .route(path(ApiPaths.CHANGE_PASSWORD), http())
+                        .filter(validateAndTranslateAccessToken())
+                        .filter(validateAndTranslateRefreshToken())
+                        .filter(LoadBalancerFilterFunctions.lb(ServiceNames.AUTHENTICATION))
+                        .build())
+                .and(route("auth-generic")
+                        .route(path(ApiPaths.AUTH_WILDCARD), http())
+                        .filter(validateAndTranslateAccessToken())
+                        .filter(LoadBalancerFilterFunctions.lb(ServiceNames.AUTHENTICATION))
                         .build());
     }
 
@@ -54,9 +69,9 @@ public class GatewayRoutes {
     public RouterFunction<ServerResponse> spotifyServiceRoutes() {
         return route("spotify")
                 .route(path(ApiPaths.SPOTIFY_WILDCARD), http())
-                .before(uri(serviceBaseUrlProperties.spotify()))
                 .filter(requireAccessToken())
                 .filter(validateAndTranslateAccessToken())
+                .filter(LoadBalancerFilterFunctions.lb(ServiceNames.SPOTIFY))
                 .build();
     }
 
@@ -64,8 +79,8 @@ public class GatewayRoutes {
     public RouterFunction<ServerResponse> earmarkServiceRoutes() {
         return route("earmark")
                 .route(path(ApiPaths.EARMARK_WILDCARD), http())
-                .before(uri(serviceBaseUrlProperties.earmark()))
                 .filter(validateAndTranslateAccessToken())
+                .filter(LoadBalancerFilterFunctions.lb(ServiceNames.EARMARK))
                 .build();
     }
 

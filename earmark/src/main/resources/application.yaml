@@ -9,7 +9,7 @@ spring:
   profiles:
     active: local
   application:
-    name: earmark
+    name: earmark-service
   datasource:
     url: jdbc:postgresql://localhost:${earmark.db.port}/${earmark.db.name}
     username: ${earmark.db.username}

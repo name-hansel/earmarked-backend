@@ -5,7 +5,7 @@ spring:
   profiles:
     active: local
   application:
-    name: authentication
+    name: authentication-service
   datasource:
     url: jdbc:postgresql://localhost:${authentication.db.port}/${authentication.db.name}
     username: ${authentication.db.username}
