@@ -7,6 +7,12 @@ spring:
   application:
     name: gateway
 
+eureka:
+  client:
+    service-url:
+      defaultZone: ${eureka.defaultZone}
+    register-with-eureka: false
+
 logging:
   level:
     org.springframework.security: DEBUG

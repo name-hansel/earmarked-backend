@@ -1,5 +1,6 @@
 server:
   port: 8081
+
 spring:
   profiles:
     active: local
@@ -18,6 +19,12 @@ spring:
     redis:
       host: localhost
       port: ${authentication.redis.port}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${eureka.defaultZone}
+
 logging:
   level:
     org.springframework.security: DEBUG
