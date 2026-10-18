@@ -10,11 +10,18 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table
+@Table(
+        name = "earmark",
+        uniqueConstraints = @UniqueConstraint(
+                name = Earmark.UQ_USER_ALBUM,
+                columnNames = {"user_id", "spotify_album_id"}
+        )
+)
 @Getter
 @Setter
 @NoArgsConstructor
 public class Earmark {
+    public static final String UQ_USER_ALBUM = "uq_earmark_user_album";
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
