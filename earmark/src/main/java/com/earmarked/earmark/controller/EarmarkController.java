@@ -1,6 +1,7 @@
 package com.earmarked.earmark.controller;
 
 import com.earmarked.earmark.config.ApiPaths;
+import com.earmarked.earmark.dto.AlbumEarmarkResponse;
 import com.earmarked.earmark.dto.CreateEarmarkRequest;
 import com.earmarked.earmark.dto.EarmarkResponse;
 import com.earmarked.earmark.service.EarmarkService;
@@ -36,7 +37,12 @@ public class EarmarkController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@AuthenticationPrincipal UUID userId, @PathVariable UUID id) {
         earmarkService.delete(id, userId);
-        
+
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/album/{albumId}")
+    public AlbumEarmarkResponse findForAlbum(@AuthenticationPrincipal UUID userId, @PathVariable String albumId) {
+        return earmarkService.findForAlbum(userId, albumId);
     }
 }

@@ -5,7 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: "{{api_url}}/api/earmark/ed2c92e1-abb9-405f-9d1c-4aa19fc45f8f"
+  url: "{{api_url}}/api/earmark/fa0bd0d1-4a9e-41d0-a3af-e228f7fb1e67"
   auth: inherit
 
 settings:

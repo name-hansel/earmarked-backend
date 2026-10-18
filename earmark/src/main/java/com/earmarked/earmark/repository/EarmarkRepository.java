@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface EarmarkRepository extends JpaRepository<Earmark, UUID> {
@@ -13,4 +14,6 @@ public interface EarmarkRepository extends JpaRepository<Earmark, UUID> {
     Page<Earmark> findByUserId(UUID userId, Pageable pageable);
 
     long deleteByIdAndUserId(UUID id, UUID userId);
+
+    Optional<Earmark> findByUserIdAndSpotifyAlbumId(UUID userId, String spotifyAlbumId);
 }

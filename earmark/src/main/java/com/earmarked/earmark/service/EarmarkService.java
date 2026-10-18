@@ -1,6 +1,7 @@
 package com.earmarked.earmark.service;
 
 import com.earmarked.earmark.config.client.SpotifyClient;
+import com.earmarked.earmark.dto.AlbumEarmarkResponse;
 import com.earmarked.earmark.dto.CreateEarmarkRequest;
 import com.earmarked.earmark.dto.EarmarkResponse;
 import com.earmarked.earmark.entity.Earmark;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -48,6 +50,12 @@ public class EarmarkService {
         if (repository.deleteByIdAndUserId(id, userId) == 0) {
             throw new EarmarkNotFoundException();
         }
+    }
+
+    public AlbumEarmarkResponse findForAlbum(UUID userId, String spotifyAlbumId) {
+        Optional<Earmark> earmark = repository.findByUserIdAndSpotifyAlbumId(userId, spotifyAlbumId);
+
+        return new AlbumEarmarkResponse(earmark.map(EarmarkResponse::from).orElse(null));
     }
 
     private boolean isAlreadyEarmarked(DataIntegrityViolationException e) {
