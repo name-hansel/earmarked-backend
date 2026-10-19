@@ -4,11 +4,13 @@ import com.earmarked.earmark.config.client.SpotifyClient;
 import com.earmarked.earmark.dto.AlbumEarmarkResponse;
 import com.earmarked.earmark.dto.CreateEarmarkRequest;
 import com.earmarked.earmark.dto.EarmarkResponse;
+import com.earmarked.earmark.dto.spotify.AlbumSummary;
 import com.earmarked.earmark.entity.Earmark;
 import com.earmarked.earmark.exception.EarmarkAlreadyExistsException;
 import com.earmarked.earmark.exception.EarmarkNotFoundException;
 import com.earmarked.earmark.repository.EarmarkRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,9 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EarmarkService {
@@ -40,9 +45,11 @@ public class EarmarkService {
         }
     }
 
-    @Transactional(readOnly = true)
     public Page<EarmarkResponse> getAll(UUID userId, Pageable pageable) {
-        return repository.findByUserId(userId, pageable).map(EarmarkResponse::from);
+        Page<EarmarkResponse> page = repository.findByUserId(userId, pageable).map(EarmarkResponse::from);
+        Map<String, AlbumSummary> albumMetadata = fetchAlbumMetadata(page.getContent());
+
+        return page.map(earmark -> earmark.withAlbum(albumMetadata.get(earmark.spotifyAlbumId())));
     }
 
     @Transactional
@@ -52,6 +59,7 @@ public class EarmarkService {
         }
     }
 
+    @Transactional(readOnly = true)
     public AlbumEarmarkResponse findForAlbum(UUID userId, String spotifyAlbumId) {
         Optional<Earmark> earmark = repository.findByUserIdAndSpotifyAlbumId(userId, spotifyAlbumId);
 
@@ -64,5 +72,20 @@ public class EarmarkService {
                 && "23505".equals(sql.getSQLState())
                 && cause.getMessage() != null
                 && cause.getMessage().contains(Earmark.UQ_USER_ALBUM);
+    }
+
+    private Map<String, AlbumSummary> fetchAlbumMetadata(List<EarmarkResponse> earmarks) {
+        List<String> spotifyAlbumIds = earmarks.stream().map(EarmarkResponse::spotifyAlbumId).distinct().toList();
+
+        if (spotifyAlbumIds.isEmpty()) {
+            return Map.of();
+        }
+
+        try {
+            return spotifyClient.getAlbums(spotifyAlbumIds);
+        } catch (Exception e) {
+            log.warn("Could not load album metadata, returning earmarks without it", e);
+            return Map.of();
+        }
     }
 }
