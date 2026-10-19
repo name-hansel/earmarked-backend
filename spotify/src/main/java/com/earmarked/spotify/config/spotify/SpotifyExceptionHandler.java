@@ -8,8 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.util.List;
 
@@ -46,5 +48,18 @@ public class SpotifyExceptionHandler {
         log.error("Spotify call failed", ex);
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                 .body(new ApiError("SPOTIFY_UNAVAILABLE", "Spotify is unavailable"));
+    }
+
+    @ExceptionHandler({
+            MissingServletRequestParameterException.class,
+            HandlerMethodValidationException.class
+    })
+    public ResponseEntity<ApiError> handleInvalidRequest(Exception ex) {
+        String message = switch (ex) {
+            case MissingServletRequestParameterException e -> "Missing required parameter: " + e.getParameterName();
+            default -> "Invalid request parameters";
+        };
+
+        return ResponseEntity.badRequest().body(new ApiError("INVALID_REQUEST", message));
     }
 }

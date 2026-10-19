@@ -6,7 +6,6 @@ import com.earmarked.spotify.dto.AlbumSummary;
 import com.earmarked.spotify.dto.TrackDetails;
 import com.earmarked.spotify.dto.spotify.SpotifyArtist;
 import com.earmarked.spotify.dto.spotify.SpotifySearchResponse;
-import com.earmarked.spotify.dto.spotify.album.SpotifyAlbum;
 import com.earmarked.spotify.dto.spotify.album.SpotifyAlbumData;
 import com.earmarked.spotify.dto.spotify.album.SpotifyAlbumFull;
 import com.earmarked.spotify.dto.spotify.track.SpotifyTrack;
@@ -41,7 +40,7 @@ public class SpotifyService {
         return toDetails(spotifyClient.getAlbum(id));
     }
 
-    private AlbumSummary toSummary(SpotifyAlbum album) {
+    private AlbumSummary toSummary(SpotifyAlbumData album) {
         return new AlbumSummary(album.id(), album.name(), getArtists(album),
                 CollectionUtils.isEmpty(album.images()) ? null : album.images().getLast().url(), album.releaseDate(),
                 album.albumType());

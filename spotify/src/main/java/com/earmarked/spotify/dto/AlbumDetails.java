@@ -4,4 +4,8 @@ import java.util.List;
 
 public record AlbumDetails(String id, String name, List<String> artists, String imageUrl, String releaseDate,
                            Integer totalTracks, String albumType, List<TrackDetails> tracks) {
+
+    public AlbumSummary toSummary() {
+        return new AlbumSummary(id, name, artists, imageUrl, releaseDate, albumType);
+    }
 }
