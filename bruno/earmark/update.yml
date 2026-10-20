@@ -1,0 +1,22 @@
+info:
+  name: update
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: "{{api_url}}/api/earmark/af46341c-e8fc-439f-84a1-bb57803ac6b8"
+  body:
+    type: json
+    data: |-
+      {
+        "note": ""
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

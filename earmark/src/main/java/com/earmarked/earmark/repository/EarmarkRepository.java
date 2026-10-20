@@ -16,4 +16,6 @@ public interface EarmarkRepository extends JpaRepository<Earmark, UUID> {
     long deleteByIdAndUserId(UUID id, UUID userId);
 
     Optional<Earmark> findByUserIdAndSpotifyAlbumId(UUID userId, String spotifyAlbumId);
+    
+    Optional<Earmark> findByIdAndUserId(UUID id, UUID userId);
 }

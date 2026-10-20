@@ -4,6 +4,7 @@ import com.earmarked.earmark.config.ApiPaths;
 import com.earmarked.earmark.dto.AlbumEarmarkResponse;
 import com.earmarked.earmark.dto.CreateEarmarkRequest;
 import com.earmarked.earmark.dto.EarmarkResponse;
+import com.earmarked.earmark.dto.UpdateEarmarkRequest;
 import com.earmarked.earmark.service.EarmarkService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,11 @@ public class EarmarkController {
     @GetMapping
     public Page<EarmarkResponse> getAll(@AuthenticationPrincipal UUID userId, @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return earmarkService.getAll(userId, pageable);
+    }
+
+    @PatchMapping("/{id}")
+    public EarmarkResponse update(@AuthenticationPrincipal UUID userId, @PathVariable UUID id, @Valid @RequestBody UpdateEarmarkRequest updateEarmarkRequest) {
+        return earmarkService.update(userId, id, updateEarmarkRequest);
     }
 
     @DeleteMapping("/{id}")

@@ -4,6 +4,7 @@ import com.earmarked.earmark.config.client.SpotifyClient;
 import com.earmarked.earmark.dto.AlbumEarmarkResponse;
 import com.earmarked.earmark.dto.CreateEarmarkRequest;
 import com.earmarked.earmark.dto.EarmarkResponse;
+import com.earmarked.earmark.dto.UpdateEarmarkRequest;
 import com.earmarked.earmark.dto.spotify.AlbumSummary;
 import com.earmarked.earmark.entity.Earmark;
 import com.earmarked.earmark.exception.EarmarkAlreadyExistsException;
@@ -50,6 +51,16 @@ public class EarmarkService {
         Map<String, AlbumSummary> albumMetadata = fetchAlbumMetadata(page.getContent());
 
         return page.map(earmark -> earmark.withAlbum(albumMetadata.get(earmark.spotifyAlbumId())));
+    }
+
+    @Transactional
+    public EarmarkResponse update(UUID userId, UUID id, UpdateEarmarkRequest request) {
+        Earmark earmark = repository.findByIdAndUserId(id, userId).orElseThrow(EarmarkNotFoundException::new);
+        
+        String note = request.note() == null || request.note().isBlank() ? null : request.note().trim();
+        earmark.setNote(note);
+
+        return EarmarkResponse.from(earmark);
     }
 
     @Transactional
