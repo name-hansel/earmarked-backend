@@ -44,7 +44,7 @@ public class SpotifyService {
     private AlbumSummary toSummary(SpotifyAlbumData album) {
         return new AlbumSummary(album.id(), album.name(), getArtists(album),
                 getImages(album.images()), album.releaseDate(),
-                album.albumType());
+                album.albumType(), getSpotifyUrl(album));
     }
 
     private AlbumDetails toDetails(SpotifyAlbumFull album) {
@@ -57,7 +57,7 @@ public class SpotifyService {
 
         return new AlbumDetails(album.id(), album.name(), getArtists(album),
                 getImages(album.images()), album.releaseDate(),
-                album.totalTracks(), album.albumType(), tracks);
+                album.totalTracks(), album.albumType(), tracks, getSpotifyUrl(album));
     }
 
     private TrackDetails getTrackDetails(SpotifyTrack track) {
@@ -76,5 +76,9 @@ public class SpotifyService {
 
     private List<AlbumImage> getImages(List<SpotifyImage> images) {
         return images.stream().map(AlbumImage::fromSpotifyImage).toList();
+    }
+
+    private String getSpotifyUrl(SpotifyAlbumData album) {
+        return album.externalUrls() != null ? album.externalUrls().get("spotify") : null;
     }
 }

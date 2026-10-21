@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record SpotifyAlbumFull(String id, String name,
@@ -15,6 +16,7 @@ public record SpotifyAlbumFull(String id, String name,
                                @JsonProperty("release_date") String releaseDate,
                                @JsonProperty("total_tracks") Integer totalTracks,
                                @JsonProperty("album_type") String albumType,
-                               SpotifyTracks tracks) implements SpotifyAlbumData {
+                               SpotifyTracks tracks,
+                               @JsonProperty("external_urls") Map<String, String> externalUrls) implements SpotifyAlbumData {
 }
 

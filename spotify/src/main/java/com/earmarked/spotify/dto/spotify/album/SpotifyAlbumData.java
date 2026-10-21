@@ -4,6 +4,7 @@ import com.earmarked.spotify.dto.spotify.SpotifyArtist;
 import com.earmarked.spotify.dto.spotify.SpotifyImage;
 
 import java.util.List;
+import java.util.Map;
 
 public interface SpotifyAlbumData {
     String id();
@@ -17,4 +18,6 @@ public interface SpotifyAlbumData {
     String releaseDate();
 
     String albumType();
+
+    Map<String, String> externalUrls();
 }
