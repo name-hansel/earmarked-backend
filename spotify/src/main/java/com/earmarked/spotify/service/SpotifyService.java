@@ -2,9 +2,11 @@ package com.earmarked.spotify.service;
 
 import com.earmarked.spotify.config.CacheConfig;
 import com.earmarked.spotify.dto.AlbumDetails;
+import com.earmarked.spotify.dto.AlbumImage;
 import com.earmarked.spotify.dto.AlbumSummary;
 import com.earmarked.spotify.dto.TrackDetails;
 import com.earmarked.spotify.dto.spotify.SpotifyArtist;
+import com.earmarked.spotify.dto.spotify.SpotifyImage;
 import com.earmarked.spotify.dto.spotify.SpotifySearchResponse;
 import com.earmarked.spotify.dto.spotify.album.SpotifyAlbumData;
 import com.earmarked.spotify.dto.spotify.album.SpotifyAlbumFull;
@@ -12,7 +14,6 @@ import com.earmarked.spotify.dto.spotify.track.SpotifyTrack;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -42,7 +43,7 @@ public class SpotifyService {
 
     private AlbumSummary toSummary(SpotifyAlbumData album) {
         return new AlbumSummary(album.id(), album.name(), getArtists(album),
-                CollectionUtils.isEmpty(album.images()) ? null : album.images().getLast().url(), album.releaseDate(),
+                getImages(album.images()), album.releaseDate(),
                 album.albumType());
     }
 
@@ -55,7 +56,7 @@ public class SpotifyService {
                 .toList();
 
         return new AlbumDetails(album.id(), album.name(), getArtists(album),
-                CollectionUtils.isEmpty(album.images()) ? null : album.images().getFirst().url(), album.releaseDate(),
+                getImages(album.images()), album.releaseDate(),
                 album.totalTracks(), album.albumType(), tracks);
     }
 
@@ -71,5 +72,9 @@ public class SpotifyService {
     private List<String> getArtists(SpotifyAlbumData album) {
         return Optional.ofNullable(album.artists())
                 .map((spotifyArtists) -> spotifyArtists.stream().map(SpotifyArtist::name).toList()).orElse(List.of());
+    }
+
+    private List<AlbumImage> getImages(List<SpotifyImage> images) {
+        return images.stream().map(AlbumImage::fromSpotifyImage).toList();
     }
 }
