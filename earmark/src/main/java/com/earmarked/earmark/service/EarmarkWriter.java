@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Component
@@ -17,7 +18,7 @@ public class EarmarkWriter {
     private final EarmarkRepository repository;
 
     @Transactional
-    public Earmark save(UUID userId, CreateEarmarkRequest request) {
+    Earmark save(UUID userId, CreateEarmarkRequest request, String albumName, LocalDate albumReleaseDate) {
         if (repository.existsByUserIdAndSpotifyAlbumId(userId, request.spotifyAlbumId())) {
             throw new EarmarkAlreadyExistsException();
         }
@@ -26,7 +27,9 @@ public class EarmarkWriter {
         earmark.setUserId(userId);
         earmark.setSpotifyAlbumId(request.spotifyAlbumId());
         earmark.setNote(request.note());
-        
+        earmark.setAlbumName(albumName);
+        earmark.setAlbumReleaseDate(albumReleaseDate);
+
         return repository.save(earmark);
     }
 }

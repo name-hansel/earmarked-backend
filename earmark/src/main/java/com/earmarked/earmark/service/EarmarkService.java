@@ -19,6 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.Year;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,10 +36,10 @@ public class EarmarkService {
     private final EarmarkRepository repository;
 
     public EarmarkResponse create(UUID userId, CreateEarmarkRequest request) {
-        spotifyClient.ensureValidAlbumId(request.spotifyAlbumId());
+        AlbumSummary album = spotifyClient.getAlbum(request.spotifyAlbumId());
 
         try {
-            Earmark saved = writer.save(userId, request);
+            Earmark saved = writer.save(userId, request, album.name(), toReleaseDate(album));
             return EarmarkResponse.from(saved);
         } catch (DataIntegrityViolationException e) {
             if (isAlreadyEarmarked(e)) {
@@ -56,7 +59,7 @@ public class EarmarkService {
     @Transactional
     public EarmarkResponse update(UUID userId, UUID id, UpdateEarmarkRequest request) {
         Earmark earmark = repository.findByIdAndUserId(id, userId).orElseThrow(EarmarkNotFoundException::new);
-        
+
         String note = request.note() == null || request.note().isBlank() ? null : request.note().trim();
         earmark.setNote(note);
 
@@ -98,5 +101,15 @@ public class EarmarkService {
             log.warn("Could not load album metadata, returning earmarks without it", e);
             return Map.of();
         }
+    }
+
+    private static LocalDate toReleaseDate(AlbumSummary album) {
+        String d = album.releaseDate();
+        return switch (album.releaseDatePrecision()) {
+            case "year" -> Year.parse(d).atDay(1);
+            case "month" -> YearMonth.parse(d).atDay(1);
+            case "day" -> LocalDate.parse(d);
+            default -> throw new IllegalStateException("Unknown precision: " + album.releaseDatePrecision());
+        };
     }
 }

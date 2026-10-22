@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -39,4 +40,10 @@ public class Earmark {
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(nullable = false, length = 512)
+    private String albumName;
+
+    @Column(nullable = false)
+    private LocalDate albumReleaseDate;
 }

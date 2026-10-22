@@ -13,7 +13,7 @@ import java.util.Map;
 public interface SpotifyClient {
 
     @GetMapping("/api/spotify/albums/{id}")
-    void ensureValidAlbumId(@PathVariable("id") String id);
+    AlbumSummary getAlbum(@PathVariable("id") String id);
 
     @GetMapping("/api/spotify/albums")
     Map<String, AlbumSummary> getAlbums(@RequestParam("ids") List<String> ids);
