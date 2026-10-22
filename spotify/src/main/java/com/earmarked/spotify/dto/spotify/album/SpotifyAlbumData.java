@@ -17,6 +17,8 @@ public interface SpotifyAlbumData {
 
     String releaseDate();
 
+    String releaseDatePrecision();
+
     String albumType();
 
     Map<String, String> externalUrls();

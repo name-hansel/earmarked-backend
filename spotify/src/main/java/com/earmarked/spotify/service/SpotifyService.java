@@ -43,7 +43,7 @@ public class SpotifyService {
 
     private AlbumSummary toSummary(SpotifyAlbumData album) {
         return new AlbumSummary(album.id(), album.name(), getArtists(album),
-                getImages(album.images()), album.releaseDate(),
+                getImages(album.images()), album.releaseDate(), album.releaseDatePrecision(),
                 album.albumType(), getSpotifyUrl(album));
     }
 
@@ -56,7 +56,7 @@ public class SpotifyService {
                 .toList();
 
         return new AlbumDetails(album.id(), album.name(), getArtists(album),
-                getImages(album.images()), album.releaseDate(),
+                getImages(album.images()), album.releaseDate(), album.releaseDatePrecision(),
                 album.totalTracks(), album.albumType(), tracks, getSpotifyUrl(album));
     }
 

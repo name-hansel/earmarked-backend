@@ -11,6 +11,7 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record SpotifyAlbum(String id, String name, List<SpotifyArtist> artists,
                            List<SpotifyImage> images, @JsonProperty("release_date") String releaseDate,
+                           @JsonProperty("release_date_precision") String releaseDatePrecision,
                            @JsonProperty("album_type") String albumType,
                            @JsonProperty("external_urls") Map<String, String> externalUrls) implements SpotifyAlbumData {
 }
