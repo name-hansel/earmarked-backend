@@ -1,25 +1,29 @@
 package com.earmarked.earmark.controller;
 
 import com.earmarked.earmark.config.ApiPaths;
+import com.earmarked.earmark.config.EarmarkSortOption;
 import com.earmarked.earmark.dto.AlbumEarmarkResponse;
 import com.earmarked.earmark.dto.CreateEarmarkRequest;
 import com.earmarked.earmark.dto.EarmarkResponse;
 import com.earmarked.earmark.dto.UpdateEarmarkRequest;
 import com.earmarked.earmark.service.EarmarkService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RequiredArgsConstructor
+@Validated
 @RequestMapping(path = ApiPaths.BASE_API_URL)
 @RestController
 public class EarmarkController {
@@ -31,7 +35,10 @@ public class EarmarkController {
     }
 
     @GetMapping
-    public Page<EarmarkResponse> getAll(@AuthenticationPrincipal UUID userId, @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public Page<EarmarkResponse> getAll(@AuthenticationPrincipal UUID userId, @RequestParam(defaultValue = "0") @Min(0) int page,
+                                        @RequestParam(defaultValue = "20") @Min(1) @Max(50) int size,
+                                        @RequestParam(defaultValue = "EARMARKED_DESC") EarmarkSortOption sort) {
+        Pageable pageable = PageRequest.of(page, size, sort.getSort());
         return earmarkService.getAll(userId, pageable);
     }
 

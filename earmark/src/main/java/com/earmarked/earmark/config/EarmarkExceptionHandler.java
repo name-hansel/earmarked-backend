@@ -13,6 +13,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -52,6 +53,15 @@ public class EarmarkExceptionHandler {
     @ExceptionHandler(RetryableException.class)
     public ResponseEntity<ApiError> handleRetryable(RetryableException e) {
         return handleApiException(new AlbumServiceUnavailableException());
+    }
+    
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+        ApiError body = new ApiError(
+                "INVALID_PARAMETER",
+                "Invalid value for '" + e.getName() + "'",
+                Map.of());
+        return ResponseEntity.badRequest().body(body);
     }
 
     @ExceptionHandler(Exception.class)
