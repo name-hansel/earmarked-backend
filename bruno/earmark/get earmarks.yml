@@ -5,7 +5,11 @@ info:
 
 http:
   method: GET
-  url: "{{api_url}}/api/earmark"
+  url: "{{api_url}}/api/earmark?q=s"
+  params:
+    - name: q
+      value: s
+      type: query
   auth: inherit
 
 settings:

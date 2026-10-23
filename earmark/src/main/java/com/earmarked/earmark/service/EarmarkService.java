@@ -39,7 +39,7 @@ public class EarmarkService {
         AlbumSummary album = spotifyClient.getAlbum(request.spotifyAlbumId());
 
         try {
-            Earmark saved = writer.save(userId, request, album.name(), toReleaseDate(album));
+            Earmark saved = writer.save(userId, request, album.name(), toReleaseDate(album), getAlbumArtists(album));
             return EarmarkResponse.from(saved);
         } catch (DataIntegrityViolationException e) {
             if (isAlreadyEarmarked(e)) {
@@ -49,8 +49,13 @@ public class EarmarkService {
         }
     }
 
-    public Page<EarmarkResponse> getAll(UUID userId, Pageable pageable) {
-        Page<EarmarkResponse> page = repository.findByUserId(userId, pageable).map(EarmarkResponse::from);
+    public Page<EarmarkResponse> getAll(UUID userId, String q, Pageable pageable) {
+        Page<Earmark> earmarks = (q == null || q.isBlank())
+                ? repository.findByUserId(userId, pageable)
+                : repository.search(userId, toLikePattern(q), pageable);
+
+        Page<EarmarkResponse> page = earmarks.map(EarmarkResponse::from);
+
         Map<String, AlbumSummary> albumMetadata = fetchAlbumMetadata(page.getContent());
 
         return page.map(earmark -> earmark.withAlbum(albumMetadata.get(earmark.spotifyAlbumId())));
@@ -111,5 +116,19 @@ public class EarmarkService {
             case "day" -> LocalDate.parse(d);
             default -> throw new IllegalStateException("Unknown precision: " + album.releaseDatePrecision());
         };
+    }
+
+    private static String getAlbumArtists(AlbumSummary album) {
+        String albumArtists = String.join(", ", album.artists());
+
+        return albumArtists.length() > 1024 ? albumArtists.substring(0, 1024) : albumArtists;
+    }
+
+    private static String toLikePattern(String q) {
+        String escaped = q.trim().toLowerCase()
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+        return "%" + escaped + "%";
     }
 }

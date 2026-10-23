@@ -18,7 +18,7 @@ public class EarmarkWriter {
     private final EarmarkRepository repository;
 
     @Transactional
-    Earmark save(UUID userId, CreateEarmarkRequest request, String albumName, LocalDate albumReleaseDate) {
+    Earmark save(UUID userId, CreateEarmarkRequest request, String albumName, LocalDate albumReleaseDate, String albumArtists) {
         if (repository.existsByUserIdAndSpotifyAlbumId(userId, request.spotifyAlbumId())) {
             throw new EarmarkAlreadyExistsException();
         }
@@ -29,6 +29,7 @@ public class EarmarkWriter {
         earmark.setNote(request.note());
         earmark.setAlbumName(albumName);
         earmark.setAlbumReleaseDate(albumReleaseDate);
+        earmark.setAlbumArtists(albumArtists);
 
         return repository.save(earmark);
     }

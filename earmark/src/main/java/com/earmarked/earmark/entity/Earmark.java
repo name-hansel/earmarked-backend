@@ -46,4 +46,7 @@ public class Earmark {
 
     @Column(nullable = false)
     private LocalDate albumReleaseDate;
+
+    @Column(nullable = false, length = 1024)
+    private String albumArtists;
 }

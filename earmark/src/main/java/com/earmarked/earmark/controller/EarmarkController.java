@@ -10,6 +10,7 @@ import com.earmarked.earmark.service.EarmarkService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,9 +38,10 @@ public class EarmarkController {
     @GetMapping
     public Page<EarmarkResponse> getAll(@AuthenticationPrincipal UUID userId, @RequestParam(defaultValue = "0") @Min(0) int page,
                                         @RequestParam(defaultValue = "20") @Min(1) @Max(50) int size,
-                                        @RequestParam(defaultValue = "EARMARKED_DESC") EarmarkSortOption sort) {
+                                        @RequestParam(defaultValue = "EARMARKED_DESC") EarmarkSortOption sort,
+                                        @RequestParam(required = false) @Size(max = 100) String q) {
         Pageable pageable = PageRequest.of(page, size, sort.getSort());
-        return earmarkService.getAll(userId, pageable);
+        return earmarkService.getAll(userId, q, pageable);
     }
 
     @PatchMapping("/{id}")
