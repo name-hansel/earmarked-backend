@@ -41,9 +41,7 @@ public interface EarmarkRepository extends JpaRepository<Earmark, UUID> {
     @Query("""
             SELECT e FROM Earmark e
             WHERE e.userId = :userId
-              AND (:listened IS NULL
-                   OR (:listened = TRUE AND e.listenedAt IS NOT NULL)
-                   OR (:listened = FALSE AND e.listenedAt IS NULL))
+              AND (:listened IS null OR e.listened = :listened)
               AND (:hasNote IS NULL
                    OR (:hasNote = TRUE AND e.note IS NOT NULL AND e.note <> '')
                    OR (:hasNote = FALSE AND (e.note IS NULL OR e.note = '')))
