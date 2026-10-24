@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity, UUID> {
@@ -18,4 +19,8 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity
                   AND r.id <> :currentTokenId
             """)
     void deleteAllExcept(@Param("userId") UUID userId, @Param("currentTokenId") UUID currentTokenId);
+
+    @Modifying
+    @Query("delete from RefreshTokenEntity t where t.expiresAt < :now")
+    int deleteExpired(@Param("now") Instant now);
 }
