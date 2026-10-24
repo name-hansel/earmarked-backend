@@ -44,6 +44,9 @@ public class Earmark {
     @Column(name = "listened_at")
     private LocalDate listenedAt;
 
+    @Column(name = "listened", nullable = false)
+    private boolean listened;
+
     @Column(nullable = false, length = 512)
     private String albumName;
 

@@ -1,17 +1,14 @@
 info:
-  name: update listened date
+  name: update listened
   type: http
   seq: 6
 
 http:
   method: PATCH
-  url: "{{api_url}}/api/earmark/91849062-3d46-48db-a812-30eba023460a/listened"
+  url: "{{api_url}}/api/earmark/b35d4723-2126-40ef-9a7e-0811c7984e6f/listened"
   body:
     type: json
-    data: |-
-      {
-        "listenedAt": null
-      }
+    data: '{"listened": true}'
   auth: inherit
 
 settings:

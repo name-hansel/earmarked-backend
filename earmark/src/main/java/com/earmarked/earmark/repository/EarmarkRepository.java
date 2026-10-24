@@ -13,8 +13,6 @@ import java.util.UUID;
 public interface EarmarkRepository extends JpaRepository<Earmark, UUID> {
     boolean existsByUserIdAndSpotifyAlbumId(UUID userId, String spotifyAlbumId);
 
-    Page<Earmark> findByUserId(UUID userId, Pageable pageable);
-
     long deleteByIdAndUserId(UUID id, UUID userId);
 
     Optional<Earmark> findByUserIdAndSpotifyAlbumId(UUID userId, String spotifyAlbumId);
@@ -22,11 +20,36 @@ public interface EarmarkRepository extends JpaRepository<Earmark, UUID> {
     Optional<Earmark> findByIdAndUserId(UUID id, UUID userId);
 
     @Query("""
-            select e from Earmark e
-            where e.userId = :userId
-              and (lower(e.albumName) like :pattern escape '\\'
-                or lower(e.albumArtists) like :pattern escape '\\'
-                or lower(e.note) like :pattern escape '\\')
+            SELECT e FROM Earmark e
+            WHERE e.userId = :userId
+              AND (lower(e.albumName) LIKE :pattern ESCAPE '\\'
+                OR lower(e.albumArtists) LIKE :pattern ESCAPE '\\'
+                OR lower(e.note) LIKE :pattern ESCAPE '\\')
+              AND (:listened IS NULL
+                OR (:listened = TRUE AND e.listenedAt IS NOT NULL)
+                OR (:listened = FALSE AND e.listenedAt IS NULL))
+              AND (:hasNote IS NULL
+                OR (:hasNote = TRUE AND e.note IS NOT NULL AND e.note <> '')
+                OR (:hasNote = FALSE AND (e.note IS NULL or e.note = '')))
             """)
-    Page<Earmark> search(@Param("userId") UUID userId, @Param("pattern") String pattern, Pageable pageable);
+    Page<Earmark> search(@Param("userId") UUID userId,
+                         @Param("pattern") String pattern,
+                         @Param("listened") Boolean listened,
+                         @Param("hasNote") Boolean hasNote,
+                         Pageable pageable);
+
+    @Query("""
+            SELECT e FROM Earmark e
+            WHERE e.userId = :userId
+              AND (:listened IS NULL
+                   OR (:listened = TRUE AND e.listenedAt IS NOT NULL)
+                   OR (:listened = FALSE AND e.listenedAt IS NULL))
+              AND (:hasNote IS NULL
+                   OR (:hasNote = TRUE AND e.note IS NOT NULL AND e.note <> '')
+                   OR (:hasNote = FALSE AND (e.note IS NULL OR e.note = '')))
+            """)
+    Page<Earmark> findFiltered(@Param("userId") UUID userId,
+                               @Param("listened") Boolean listened,
+                               @Param("hasNote") Boolean hasNote,
+                               Pageable pageable);
 }

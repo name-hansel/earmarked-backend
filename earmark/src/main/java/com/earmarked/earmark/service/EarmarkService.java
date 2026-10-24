@@ -1,5 +1,6 @@
 package com.earmarked.earmark.service;
 
+import com.earmarked.earmark.config.EarmarkStatus;
 import com.earmarked.earmark.config.client.SpotifyClient;
 import com.earmarked.earmark.dto.AlbumEarmarkResponse;
 import com.earmarked.earmark.dto.CreateEarmarkRequest;
@@ -51,13 +52,13 @@ public class EarmarkService {
         }
     }
 
-    public Page<EarmarkResponse> getAll(UUID userId, String q, Pageable pageable) {
+    public Page<EarmarkResponse> getAll(UUID userId, String q, Pageable pageable, EarmarkStatus status, Boolean hasNote) {
+        Boolean listened = status == null ? null : status == EarmarkStatus.LISTENED;
         Page<Earmark> earmarks = (q == null || q.isBlank())
-                ? repository.findByUserId(userId, pageable)
-                : repository.search(userId, toLikePattern(q), pageable);
+                ? repository.findFiltered(userId, listened, hasNote, pageable)
+                : repository.search(userId, toLikePattern(q), listened, hasNote, pageable);
 
         Page<EarmarkResponse> page = earmarks.map(EarmarkResponse::from);
-
         Map<String, AlbumSummary> albumMetadata = fetchAlbumMetadata(page.getContent());
 
         return page.map(earmark -> earmark.withAlbum(albumMetadata.get(earmark.spotifyAlbumId())));
@@ -90,10 +91,13 @@ public class EarmarkService {
     }
 
     @Transactional
-    public EarmarkResponse updateListened(UUID userId, UUID id, LocalDate listenedAt) {
-        validateListenedAt(listenedAt);
+    public EarmarkResponse updateListened(UUID userId, UUID id, boolean listened) {
         Earmark earmark = repository.findByIdAndUserId(id, userId).orElseThrow(EarmarkNotFoundException::new);
-        earmark.setListenedAt(listenedAt);
+        
+        earmark.setListened(listened);
+        if (!listened) {
+            earmark.setListenedAt(null);
+        }
 
         return EarmarkResponse.from(earmark);
     }

@@ -8,13 +8,13 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record EarmarkResponse(UUID id, String spotifyAlbumId, String note, Instant createdAt, AlbumSummary album,
-                              LocalDate listenedAt) {
+                              LocalDate listenedAt, boolean listened) {
     public static EarmarkResponse from(Earmark earmark) {
         return new EarmarkResponse(earmark.getId(), earmark.getSpotifyAlbumId(), earmark.getNote(),
-                earmark.getCreatedAt(), null, earmark.getListenedAt());
+                earmark.getCreatedAt(), null, earmark.getListenedAt(), earmark.isListened());
     }
 
     public EarmarkResponse withAlbum(AlbumSummary album) {
-        return new EarmarkResponse(id, spotifyAlbumId, note, createdAt, album, listenedAt);
+        return new EarmarkResponse(id, spotifyAlbumId, note, createdAt, album, listenedAt, listened);
     }
 }

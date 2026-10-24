@@ -2,6 +2,7 @@ package com.earmarked.earmark.controller;
 
 import com.earmarked.earmark.config.ApiPaths;
 import com.earmarked.earmark.config.EarmarkSortOption;
+import com.earmarked.earmark.config.EarmarkStatus;
 import com.earmarked.earmark.dto.*;
 import com.earmarked.earmark.service.EarmarkService;
 import jakarta.validation.Valid;
@@ -36,9 +37,11 @@ public class EarmarkController {
     public Page<EarmarkResponse> getAll(@AuthenticationPrincipal UUID userId, @RequestParam(defaultValue = "0") @Min(0) int page,
                                         @RequestParam(defaultValue = "20") @Min(1) @Max(50) int size,
                                         @RequestParam(defaultValue = "EARMARKED_DESC") EarmarkSortOption sort,
-                                        @RequestParam(required = false) @Size(max = 100) String q) {
+                                        @RequestParam(required = false) @Size(max = 100) String q,
+                                        @RequestParam(required = false) EarmarkStatus status,
+                                        @RequestParam(required = false) Boolean hasNote) {
         Pageable pageable = PageRequest.of(page, size, sort.getSort());
-        return earmarkService.getAll(userId, q, pageable);
+        return earmarkService.getAll(userId, q, pageable, status, hasNote);
     }
 
     @PatchMapping("/{id}")
@@ -60,6 +63,6 @@ public class EarmarkController {
 
     @PatchMapping("/{id}/listened")
     public EarmarkResponse updateListened(@AuthenticationPrincipal UUID userId, @PathVariable UUID id, @RequestBody UpdateListenedRequest request) {
-        return earmarkService.updateListened(userId, id, request.listenedAt());
+        return earmarkService.updateListened(userId, id, request.listened());
     }
 }

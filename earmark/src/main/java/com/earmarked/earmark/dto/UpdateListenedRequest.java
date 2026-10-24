@@ -1,6 +1,6 @@
 package com.earmarked.earmark.dto;
 
-import java.time.LocalDate;
+import jakarta.validation.constraints.NotNull;
 
-public record UpdateListenedRequest(LocalDate listenedAt) {
+public record UpdateListenedRequest(@NotNull Boolean listened) {
 }

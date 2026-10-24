@@ -10,7 +10,9 @@ public enum EarmarkSortOption {
     ALBUM_NAME_ASC(Sort.by(Sort.Order.asc("albumName").ignoreCase())),
     ALBUM_NAME_DESC(Sort.by(Sort.Order.desc("albumName").ignoreCase())),
     RELEASE_DATE_DESC(Sort.by(Sort.Order.desc("albumReleaseDate"))),
-    RELEASE_DATE_ASC(Sort.by(Sort.Order.asc("albumReleaseDate")));
+    RELEASE_DATE_ASC(Sort.by(Sort.Order.asc("albumReleaseDate"))),
+    LISTENED_DESC(Sort.by(Sort.Order.desc("listenedAt").nullsLast())),
+    LISTENED_ASC(Sort.by(Sort.Order.asc("listenedAt").nullsLast()));
 
     private final Sort sort;
 
