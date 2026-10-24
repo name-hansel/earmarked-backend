@@ -11,6 +11,7 @@ import com.earmarked.earmark.entity.Earmark;
 import com.earmarked.earmark.exception.EarmarkAlreadyExistsException;
 import com.earmarked.earmark.exception.EarmarkNotFoundException;
 import com.earmarked.earmark.exception.InvalidListenedDateException;
+import com.earmarked.earmark.exception.InvalidListenedStateException;
 import com.earmarked.earmark.repository.EarmarkRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,10 +68,16 @@ public class EarmarkService {
     @Transactional
     public EarmarkResponse update(UUID userId, UUID id, UpdateEarmarkRequest request) {
         Earmark earmark = repository.findByIdAndUserId(id, userId).orElseThrow(EarmarkNotFoundException::new);
+
+        if (!request.listened() && request.listenedAt() != null) {
+            throw new InvalidListenedStateException();
+        }
+
         validateListenedAt(request.listenedAt());
 
         String note = request.note() == null || request.note().isBlank() ? null : request.note().trim();
         earmark.setNote(note);
+        earmark.setListened(request.listened());
         earmark.setListenedAt(request.listenedAt());
 
         return EarmarkResponse.from(earmark);
@@ -93,7 +100,7 @@ public class EarmarkService {
     @Transactional
     public EarmarkResponse updateListened(UUID userId, UUID id, boolean listened) {
         Earmark earmark = repository.findByIdAndUserId(id, userId).orElseThrow(EarmarkNotFoundException::new);
-        
+
         earmark.setListened(listened);
         if (!listened) {
             earmark.setListenedAt(null);
