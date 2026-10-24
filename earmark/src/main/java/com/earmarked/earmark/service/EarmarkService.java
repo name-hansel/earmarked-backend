@@ -9,6 +9,7 @@ import com.earmarked.earmark.dto.spotify.AlbumSummary;
 import com.earmarked.earmark.entity.Earmark;
 import com.earmarked.earmark.exception.EarmarkAlreadyExistsException;
 import com.earmarked.earmark.exception.EarmarkNotFoundException;
+import com.earmarked.earmark.exception.InvalidListenedDateException;
 import com.earmarked.earmark.repository.EarmarkRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Year;
 import java.time.YearMonth;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,6 +85,18 @@ public class EarmarkService {
         Optional<Earmark> earmark = repository.findByUserIdAndSpotifyAlbumId(userId, spotifyAlbumId);
 
         return new AlbumEarmarkResponse(earmark.map(EarmarkResponse::from).orElse(null));
+    }
+
+    @Transactional
+    public EarmarkResponse updateListened(UUID userId, UUID id, LocalDate listenedAt) {
+        if (listenedAt != null && listenedAt.isAfter(LocalDate.now(ZoneOffset.UTC).plusDays(1))) {
+            throw new InvalidListenedDateException();
+        }
+
+        Earmark earmark = repository.findByIdAndUserId(id, userId).orElseThrow(EarmarkNotFoundException::new);
+        earmark.setListenedAt(listenedAt);
+
+        return EarmarkResponse.from(earmark);
     }
 
     private boolean isAlreadyEarmarked(DataIntegrityViolationException e) {

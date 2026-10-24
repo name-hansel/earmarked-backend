@@ -2,10 +2,7 @@ package com.earmarked.earmark.controller;
 
 import com.earmarked.earmark.config.ApiPaths;
 import com.earmarked.earmark.config.EarmarkSortOption;
-import com.earmarked.earmark.dto.AlbumEarmarkResponse;
-import com.earmarked.earmark.dto.CreateEarmarkRequest;
-import com.earmarked.earmark.dto.EarmarkResponse;
-import com.earmarked.earmark.dto.UpdateEarmarkRequest;
+import com.earmarked.earmark.dto.*;
 import com.earmarked.earmark.service.EarmarkService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -59,5 +56,10 @@ public class EarmarkController {
     @GetMapping("/album/{albumId}")
     public AlbumEarmarkResponse findForAlbum(@AuthenticationPrincipal UUID userId, @PathVariable String albumId) {
         return earmarkService.findForAlbum(userId, albumId);
+    }
+
+    @PatchMapping("/{id}/listened")
+    public EarmarkResponse updateListened(@AuthenticationPrincipal UUID userId, @PathVariable UUID id, @RequestBody UpdateListenedRequest request) {
+        return earmarkService.updateListened(userId, id, request.listenedAt());
     }
 }
