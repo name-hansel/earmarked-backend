@@ -66,9 +66,11 @@ public class EarmarkService {
     @Transactional
     public EarmarkResponse update(UUID userId, UUID id, UpdateEarmarkRequest request) {
         Earmark earmark = repository.findByIdAndUserId(id, userId).orElseThrow(EarmarkNotFoundException::new);
+        validateListenedAt(request.listenedAt());
 
         String note = request.note() == null || request.note().isBlank() ? null : request.note().trim();
         earmark.setNote(note);
+        earmark.setListenedAt(request.listenedAt());
 
         return EarmarkResponse.from(earmark);
     }
@@ -89,10 +91,7 @@ public class EarmarkService {
 
     @Transactional
     public EarmarkResponse updateListened(UUID userId, UUID id, LocalDate listenedAt) {
-        if (listenedAt != null && listenedAt.isAfter(LocalDate.now(ZoneOffset.UTC).plusDays(1))) {
-            throw new InvalidListenedDateException();
-        }
-
+        validateListenedAt(listenedAt);
         Earmark earmark = repository.findByIdAndUserId(id, userId).orElseThrow(EarmarkNotFoundException::new);
         earmark.setListenedAt(listenedAt);
 
@@ -144,5 +143,11 @@ public class EarmarkService {
                 .replace("%", "\\%")
                 .replace("_", "\\_");
         return "%" + escaped + "%";
+    }
+
+    private void validateListenedAt(LocalDate listenedAt) {
+        if (listenedAt != null && listenedAt.isAfter(LocalDate.now(ZoneOffset.UTC).plusDays(1))) {
+            throw new InvalidListenedDateException();
+        }
     }
 }
