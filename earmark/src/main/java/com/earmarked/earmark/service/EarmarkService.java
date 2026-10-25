@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -95,6 +96,12 @@ public class EarmarkService {
         Optional<Earmark> earmark = repository.findByUserIdAndSpotifyAlbumId(userId, spotifyAlbumId);
 
         return new AlbumEarmarkResponse(earmark.map(EarmarkResponse::from).orElse(null));
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, EarmarkResponse> findForAlbums(UUID userId, List<String> spotifyAlbumIds) {
+        return repository.findByUserIdAndSpotifyAlbumIdIn(userId, spotifyAlbumIds).stream()
+                .collect(Collectors.toMap(Earmark::getSpotifyAlbumId, EarmarkResponse::from));
     }
 
     @Transactional

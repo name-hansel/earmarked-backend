@@ -19,6 +19,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -56,9 +58,14 @@ public class EarmarkController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/album/{albumId}")
-    public AlbumEarmarkResponse findForAlbum(@AuthenticationPrincipal UUID userId, @PathVariable String albumId) {
-        return earmarkService.findForAlbum(userId, albumId);
+    @GetMapping("/album/{spotifyAlbumId}")
+    public AlbumEarmarkResponse findForAlbum(@AuthenticationPrincipal UUID userId, @PathVariable String spotifyAlbumId) {
+        return earmarkService.findForAlbum(userId, spotifyAlbumId);
+    }
+
+    @GetMapping("/albums")
+    public Map<String, EarmarkResponse> findForAlbums(@AuthenticationPrincipal UUID userId, @RequestParam("spotifyAlbumIds") List<String> spotifyAlbumIds) {
+        return earmarkService.findForAlbums(userId, spotifyAlbumIds);
     }
 
     @PatchMapping("/{id}/listened")
