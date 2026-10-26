@@ -19,6 +19,8 @@ import org.springframework.web.servlet.function.ServerResponse;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static com.earmarked.gateway.config.jwt.JwtConfiguration.ACCESS_TOKEN_COOKIE_PATH;
 import static com.earmarked.gateway.config.jwt.JwtConfiguration.REFRESH_TOKEN_COOKIE_PATH;
@@ -44,12 +46,17 @@ public class GatewayRoutes {
                         .after(setAuthCookies())
                         .filter(LoadBalancerFilterFunctions.lb(ServiceNames.AUTHENTICATION))
                         .build())
-                .and(route("auth-logout-delete-account")
-                        .route(path(ApiPaths.LOGOUT)
-                                .or(path(ApiPaths.DELETE_ACCOUNT)), http())
+                .and(route("auth-delete-account")
+                        .route(path(ApiPaths.DELETE_ACCOUNT), http())
                         .filter(validateAndTranslateAccessToken())
                         .filter(validateAndTranslateRefreshToken())
                         .after(clearAuthCookies())
+                        .filter(LoadBalancerFilterFunctions.lb(ServiceNames.AUTHENTICATION))
+                        .build())
+                .and(route("auth-logout")
+                        .route(path(ApiPaths.LOGOUT), http())
+                        .before(forwardRefreshTokenUnvalidated())
+                        .after(clearAuthCookiesUnlessServerError())
                         .filter(LoadBalancerFilterFunctions.lb(ServiceNames.AUTHENTICATION))
                         .build())
                 .and(route("auth-change-password")
@@ -139,6 +146,7 @@ public class GatewayRoutes {
             String authHeader = response.headers().getFirst(HttpHeaders.AUTHORIZATION);
             String refreshHeader = response.headers().getFirst(JwtConfiguration.REFRESH_TOKEN_HEADER);
 
+            // Remove existing headers, so only headers from cookies are present
             headers.remove(HttpHeaders.AUTHORIZATION);
             headers.remove(JwtConfiguration.REFRESH_TOKEN_HEADER);
 
@@ -159,9 +167,22 @@ public class GatewayRoutes {
         };
     }
 
+    private ResponseCookie buildCookie(String name, String value, String path, Duration maxAge) {
+        return ResponseCookie.from(name, value).httpOnly(true).secure(true).sameSite(Cookie.SameSite.STRICT.name())
+                .path(path).maxAge(maxAge).build();
+    }
+
     private BiFunction<ServerRequest, ServerResponse, ServerResponse> clearAuthCookies() {
+        return clearCookies(response -> response.statusCode().is2xxSuccessful());
+    }
+
+    private BiFunction<ServerRequest, ServerResponse, ServerResponse> clearAuthCookiesUnlessServerError() {
+        return clearCookies(response -> !response.statusCode().is5xxServerError());
+    }
+
+    private BiFunction<ServerRequest, ServerResponse, ServerResponse> clearCookies(Predicate<ServerResponse> shouldClear) {
         return (request, response) -> {
-            if (!response.statusCode().is2xxSuccessful()) {
+            if (!shouldClear.test(response)) {
                 return response;
             }
 
@@ -172,11 +193,6 @@ public class GatewayRoutes {
 
             return response;
         };
-    }
-
-    private ResponseCookie buildCookie(String name, String value, String path, Duration maxAge) {
-        return ResponseCookie.from(name, value).httpOnly(true).secure(true).sameSite(Cookie.SameSite.STRICT.name())
-                .path(path).maxAge(maxAge).build();
     }
 
     private ResponseCookie clearCookie(String name, String path) {
@@ -194,5 +210,23 @@ public class GatewayRoutes {
     private Duration remainingTtl(String token) {
         Duration d = Duration.between(Instant.now(), jwtService.extractExpiration(token));
         return d.isNegative() ? Duration.ZERO : d;
+    }
+
+    private Function<ServerRequest, ServerRequest> forwardRefreshTokenUnvalidated() {
+        return request -> {
+            jakarta.servlet.http.Cookie refreshCookie = request.cookies()
+                    .getFirst(JwtConfiguration.TokenType.refreshToken());
+
+            return ServerRequest.from(request).headers(headers -> {
+                // Remove existing headers, so only headers from cookies are present
+                headers.remove(HttpHeaders.COOKIE);
+                headers.remove(HttpHeaders.AUTHORIZATION);
+                headers.remove(JwtConfiguration.REFRESH_TOKEN_HEADER);
+
+                if (refreshCookie != null) {
+                    headers.set(JwtConfiguration.REFRESH_TOKEN_HEADER, refreshCookie.getValue());
+                }
+            }).build();
+        };
     }
 }
