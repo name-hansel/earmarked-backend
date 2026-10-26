@@ -26,8 +26,8 @@ public class SpotifyService {
     private final SpotifyClient spotifyClient;
 
     @Cacheable(value = CacheConfig.ALBUM_SEARCH, key = "#query.trim().toLowerCase()")
-    public List<AlbumSummary> searchAlbums(String query) {
-        SpotifySearchResponse searchResponse = spotifyClient.searchAlbums(query);
+    public List<AlbumSummary> searchAlbums(String query, int size) {
+        SpotifySearchResponse searchResponse = spotifyClient.searchAlbums(query, size);
 
         if (searchResponse == null || searchResponse.albums() == null || searchResponse.albums().items() == null) {
             return List.of();

@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 public class SpotifyClient {
     private final SpotifyApi spotifyApi;
 
-    public SpotifySearchResponse searchAlbums(String query) {
+    public SpotifySearchResponse searchAlbums(String query, int size) {
         log.info("Calling Spotify: search albums '{}'", query);
-        return spotifyApi.search(query, "album", 5);
+        return spotifyApi.search(query, "album", size);
     }
 
     public SpotifyAlbumFull getAlbum(String id) {

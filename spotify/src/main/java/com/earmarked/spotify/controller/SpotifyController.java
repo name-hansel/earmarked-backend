@@ -5,9 +5,7 @@ import com.earmarked.spotify.dto.AlbumDetails;
 import com.earmarked.spotify.dto.AlbumSummary;
 import com.earmarked.spotify.service.SpotifyAlbumBatchService;
 import com.earmarked.spotify.service.SpotifyService;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,8 +23,8 @@ public class SpotifyController {
     private final SpotifyAlbumBatchService spotifyAlbumBatchService;
 
     @GetMapping(ApiPaths.SEARCH)
-    public List<AlbumSummary> search(@RequestParam("q") @NotBlank String query) {
-        return spotifyService.searchAlbums(query);
+    public List<AlbumSummary> search(@RequestParam("q") @NotBlank String query, @RequestParam(defaultValue = "6") @Min(1) @Max(10) int size) {
+        return spotifyService.searchAlbums(query, size);
     }
 
     @GetMapping(ApiPaths.ALBUM)
