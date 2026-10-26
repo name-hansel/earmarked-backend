@@ -57,8 +57,19 @@ public class AuthenticationService {
     }
 
     public void logout(String refreshToken) {
-        UUID refreshTokenUuid = jwtService.extractTokenId(refreshToken);
-        refreshTokenService.revoke(refreshTokenUuid);
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return;
+        }
+
+        UUID refreshTokenId;
+        try {
+            refreshTokenId = jwtService.extractTokenId(refreshToken);
+        } catch (RuntimeException e) {
+            // invalid or expired token: nothing to revoke, the client is logged out either way
+            return;
+        }
+
+        refreshTokenService.revoke(refreshTokenId);
     }
 
     public TokenPair refresh(String oldRefreshToken) {
