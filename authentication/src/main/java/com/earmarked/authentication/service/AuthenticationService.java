@@ -1,6 +1,7 @@
 package com.earmarked.authentication.service;
 
 import com.earmarked.authentication.dto.UserDTO;
+import com.earmarked.authentication.dto.UserDeletedEvent;
 import com.earmarked.authentication.dto.delete_account.DeleteAccountRequest;
 import com.earmarked.authentication.dto.login.LoginRequest;
 import com.earmarked.authentication.dto.result.TokenPair;
@@ -12,6 +13,7 @@ import com.earmarked.authentication.service.token.AccountActivationTokenService;
 import com.earmarked.authentication.service.token.PasswordResetTokenService;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ public class AuthenticationService {
     private final PasswordResetTokenService passwordResetTokenService;
     private final AccountActivationTokenService accountActivationTokenService;
     private final EmailService emailService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public void register(String email, String password, String username) {
         String trimmedEmail = email.trim();
@@ -93,7 +96,7 @@ public class AuthenticationService {
     public void deleteAccount(DeleteAccountRequest deleteAccountRequest, UUID userId) {
         userService.deleteUser(userId, deleteAccountRequest.password());
         refreshTokenService.deleteAllForUser(userId);
-        // TODO - delete other related entities
+        eventPublisher.publishEvent(new UserDeletedEvent(userId));
     }
 
     public void resendActivationEmail(String email) {
