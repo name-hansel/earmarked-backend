@@ -1,4 +1,4 @@
-package com.earmarked.authentication.config.kafka;
+package com.earmarked.authentication.messaging;
 
 import com.earmarked.authentication.dto.UserDeletedEvent;
 import lombok.RequiredArgsConstructor;

@@ -116,6 +116,12 @@ public class EarmarkService {
         return EarmarkResponse.from(earmark);
     }
 
+    @Transactional
+    public void deleteAllForUser(UUID userId) {
+        int deleted = repository.deleteAllByUserId(userId);
+        log.info("Deleted {} earmarks for deleted user {}", deleted, userId);
+    }
+
     private boolean isAlreadyEarmarked(DataIntegrityViolationException e) {
         Throwable cause = e.getMostSpecificCause();
         return cause instanceof SQLException sql

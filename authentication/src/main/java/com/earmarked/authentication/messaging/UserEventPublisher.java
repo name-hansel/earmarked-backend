@@ -1,5 +1,6 @@
-package com.earmarked.authentication.config.kafka;
+package com.earmarked.authentication.messaging;
 
+import com.earmarked.authentication.config.kafka.KafkaTopicConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;

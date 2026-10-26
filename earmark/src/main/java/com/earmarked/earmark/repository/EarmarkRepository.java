@@ -4,6 +4,7 @@ import com.earmarked.earmark.entity.Earmark;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -53,4 +54,8 @@ public interface EarmarkRepository extends JpaRepository<Earmark, UUID> {
                                Pageable pageable);
 
     List<Earmark> findByUserIdAndSpotifyAlbumIdIn(UUID userId, List<String> spotifyAlbumIds);
+
+    @Modifying
+    @Query("delete from Earmark e where e.userId = :userId")
+    int deleteAllByUserId(@Param("userId") UUID userId);
 }
