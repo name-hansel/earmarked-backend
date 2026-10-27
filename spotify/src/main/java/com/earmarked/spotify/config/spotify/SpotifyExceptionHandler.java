@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -20,6 +21,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestControllerAdvice
 @Slf4j
@@ -40,8 +42,8 @@ public class SpotifyExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.badRequest().body(new ApiError("VALIDATION_ERROR", message));
     }
 
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ApiError> handleInvalidRequest(MissingServletRequestParameterException ex) {
+    @Override
+    protected @Nullable ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         return ResponseEntity.badRequest()
                 .body(new ApiError("INVALID_REQUEST", "Missing required parameter: " + ex.getParameterName()));
     }
@@ -54,8 +56,16 @@ public class SpotifyExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected @Nullable ResponseEntity<Object> handleHandlerMethodValidationException(HandlerMethodValidationException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        return super.handleHandlerMethodValidationException(ex, headers, status, request);
+    protected ResponseEntity<Object> handleHandlerMethodValidationException(HandlerMethodValidationException ex,
+                                                                            HttpHeaders headers, HttpStatusCode status,
+                                                                            WebRequest request) {
+        String message = ex.getAllErrors().stream()
+                .map(MessageSourceResolvable::getDefaultMessage)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse("Invalid request parameters");
+
+        return ResponseEntity.badRequest().body(new ApiError("VALIDATION_ERROR", message));
     }
 
     @ExceptionHandler(FeignException.NotFound.class)
