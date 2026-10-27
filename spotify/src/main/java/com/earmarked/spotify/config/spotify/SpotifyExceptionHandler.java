@@ -5,26 +5,57 @@ import feign.FeignException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.List;
 
 @RestControllerAdvice
 @Slf4j
-public class SpotifyExceptionHandler {
+public class SpotifyExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+        ApiError body = new ApiError(
+                "INVALID_PARAMETER",
+                "Invalid value for '" + e.getName() + "'");
+        return ResponseEntity.badRequest().body(body);
+    }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiError> handleValidation(ConstraintViolationException ex) {
         var message = ex.getConstraintViolations().stream()
                 .findFirst().map(ConstraintViolation::getMessage).orElse("Invalid request parameters");
         return ResponseEntity.badRequest().body(new ApiError("VALIDATION_ERROR", message));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiError> handleInvalidRequest(MissingServletRequestParameterException ex) {
+        return ResponseEntity.badRequest()
+                .body(new ApiError("INVALID_REQUEST", "Missing required parameter: " + ex.getParameterName()));
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException exception,
+                                                                  HttpHeaders headers, HttpStatusCode status,
+                                                                  WebRequest request) {
+        return ResponseEntity.badRequest().body(new ApiError("INVALID_REQUEST", "Invalid request parameters"));
+    }
+
+    @Override
+    protected @Nullable ResponseEntity<Object> handleHandlerMethodValidationException(HandlerMethodValidationException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        return super.handleHandlerMethodValidationException(ex, headers, status, request);
     }
 
     @ExceptionHandler(FeignException.NotFound.class)
@@ -51,24 +82,26 @@ public class SpotifyExceptionHandler {
                 .body(new ApiError("SPOTIFY_UNAVAILABLE", "Spotify is unavailable"));
     }
 
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
-        ApiError body = new ApiError(
-                "INVALID_PARAMETER",
-                "Invalid value for '" + e.getName() + "'");
-        return ResponseEntity.badRequest().body(body);
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(Exception exception, @Nullable Object body,
+                                                             HttpHeaders headers, HttpStatusCode statusCode,
+                                                             WebRequest request) {
+        if (statusCode.is5xxServerError()) {
+            log.error("Server error while handling request", exception);
+        }
+
+        HttpStatus status = HttpStatus.resolve(statusCode.value());
+        String code = status != null ? status.name() : "ERROR";
+        String message = status != null ? status.getReasonPhrase() : "Request failed";
+
+        return ResponseEntity.status(statusCode).headers(headers).body(new ApiError(code, message));
     }
 
-    @ExceptionHandler({
-            MissingServletRequestParameterException.class,
-            HandlerMethodValidationException.class
-    })
-    public ResponseEntity<ApiError> handleInvalidRequest(Exception ex) {
-        String message = switch (ex) {
-            case MissingServletRequestParameterException e -> "Missing required parameter: " + e.getParameterName();
-            default -> "Invalid request parameters";
-        };
-
-        return ResponseEntity.badRequest().body(new ApiError("INVALID_REQUEST", message));
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleUnexpectedException(Exception exception) {
+        log.error("Unexpected error occurred", exception);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiError("INTERNAL_SERVER_ERROR", "An unexpected error occurred"));
     }
+
 }
