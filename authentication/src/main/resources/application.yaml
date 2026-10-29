@@ -3,7 +3,7 @@ server:
 
 spring:
   profiles:
-    active: local
+    active: local,resend
   application:
     name: authentication-service
   datasource:

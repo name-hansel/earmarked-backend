@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
-@Profile("local")
+@Profile("!resend")
 @Slf4j
 public class LocalEmailService implements EmailService {
     private static final String LOCAL_FRONTEND = "http://localhost:5173";

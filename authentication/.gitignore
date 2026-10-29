@@ -1,4 +1,5 @@
 application-local.yaml
+application-resend.yaml
 src/main/resources/keys/
 HELP.md
 target/
