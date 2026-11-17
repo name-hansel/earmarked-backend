@@ -1,4 +1,4 @@
-package com.earmarked.earmark.dto;
+package com.earmarked.earmark.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

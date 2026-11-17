@@ -1,6 +1,6 @@
 package com.earmarked.earmark.config;
 
-import com.earmarked.earmark.dto.ApiError;
+import com.earmarked.earmark.dto.response.ApiError;
 import com.earmarked.earmark.exception.ApiException;
 import com.earmarked.earmark.exception.album.AlbumServiceUnavailableException;
 import feign.RetryableException;

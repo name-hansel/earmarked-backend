@@ -1,4 +1,4 @@
-package com.earmarked.earmark.dto;
+package com.earmarked.earmark.dto.response;
 
 import java.util.Map;
 

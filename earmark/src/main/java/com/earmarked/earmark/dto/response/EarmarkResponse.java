@@ -1,4 +1,4 @@
-package com.earmarked.earmark.dto;
+package com.earmarked.earmark.dto.response;
 
 import com.earmarked.earmark.dto.spotify.AlbumSummary;
 import com.earmarked.earmark.entity.Earmark;

@@ -2,10 +2,10 @@ package com.earmarked.earmark.service;
 
 import com.earmarked.earmark.config.EarmarkStatus;
 import com.earmarked.earmark.config.client.SpotifyClient;
-import com.earmarked.earmark.dto.AlbumEarmarkResponse;
-import com.earmarked.earmark.dto.CreateEarmarkRequest;
-import com.earmarked.earmark.dto.EarmarkResponse;
-import com.earmarked.earmark.dto.UpdateEarmarkRequest;
+import com.earmarked.earmark.dto.request.CreateEarmarkRequest;
+import com.earmarked.earmark.dto.request.UpdateEarmarkRequest;
+import com.earmarked.earmark.dto.response.AlbumEarmarkResponse;
+import com.earmarked.earmark.dto.response.EarmarkResponse;
 import com.earmarked.earmark.dto.spotify.AlbumSummary;
 import com.earmarked.earmark.entity.Earmark;
 import com.earmarked.earmark.exception.EarmarkAlreadyExistsException;
