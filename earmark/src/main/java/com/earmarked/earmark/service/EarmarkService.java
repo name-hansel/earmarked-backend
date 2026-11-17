@@ -70,7 +70,7 @@ public class EarmarkService {
     public EarmarkResponse update(UUID userId, UUID id, UpdateEarmarkRequest request) {
         Earmark earmark = repository.findByIdAndUserId(id, userId).orElseThrow(EarmarkNotFoundException::new);
 
-        if (!request.listened() && request.listenedAt() != null) {
+        if (!request.listened() && (request.listenedAt() != null || request.rating() != null)) {
             throw new InvalidListenedStateException();
         }
 
@@ -80,6 +80,7 @@ public class EarmarkService {
         earmark.setNote(note);
         earmark.setListened(request.listened());
         earmark.setListenedAt(request.listenedAt());
+        earmark.setRating(request.rating());
 
         return EarmarkResponse.from(earmark);
     }
@@ -111,6 +112,7 @@ public class EarmarkService {
         earmark.setListened(listened);
         if (!listened) {
             earmark.setListenedAt(null);
+            earmark.setRating(null);
         }
 
         return EarmarkResponse.from(earmark);
