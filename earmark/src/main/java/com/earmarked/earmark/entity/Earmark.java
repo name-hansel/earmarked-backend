@@ -55,4 +55,7 @@ public class Earmark {
 
     @Column(nullable = false, length = 1024)
     private String albumArtists;
+
+    @Column(nullable = true)
+    private Short rating;
 }
