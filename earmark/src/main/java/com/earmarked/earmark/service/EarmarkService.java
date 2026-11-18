@@ -2,10 +2,10 @@ package com.earmarked.earmark.service;
 
 import com.earmarked.earmark.config.EarmarkStatus;
 import com.earmarked.earmark.config.client.SpotifyClient;
-import com.earmarked.earmark.dto.AlbumEarmarkResponse;
-import com.earmarked.earmark.dto.CreateEarmarkRequest;
-import com.earmarked.earmark.dto.EarmarkResponse;
-import com.earmarked.earmark.dto.UpdateEarmarkRequest;
+import com.earmarked.earmark.dto.request.CreateEarmarkRequest;
+import com.earmarked.earmark.dto.request.UpdateEarmarkRequest;
+import com.earmarked.earmark.dto.response.AlbumEarmarkResponse;
+import com.earmarked.earmark.dto.response.EarmarkResponse;
 import com.earmarked.earmark.dto.spotify.AlbumSummary;
 import com.earmarked.earmark.entity.Earmark;
 import com.earmarked.earmark.exception.EarmarkAlreadyExistsException;
@@ -70,7 +70,7 @@ public class EarmarkService {
     public EarmarkResponse update(UUID userId, UUID id, UpdateEarmarkRequest request) {
         Earmark earmark = repository.findByIdAndUserId(id, userId).orElseThrow(EarmarkNotFoundException::new);
 
-        if (!request.listened() && request.listenedAt() != null) {
+        if (!request.listened() && (request.listenedAt() != null || request.rating() != null)) {
             throw new InvalidListenedStateException();
         }
 
@@ -80,6 +80,7 @@ public class EarmarkService {
         earmark.setNote(note);
         earmark.setListened(request.listened());
         earmark.setListenedAt(request.listenedAt());
+        earmark.setRating(request.rating());
 
         return EarmarkResponse.from(earmark);
     }
@@ -111,6 +112,7 @@ public class EarmarkService {
         earmark.setListened(listened);
         if (!listened) {
             earmark.setListenedAt(null);
+            earmark.setRating(null);
         }
 
         return EarmarkResponse.from(earmark);

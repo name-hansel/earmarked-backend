@@ -1,6 +1,6 @@
 package com.earmarked.earmark.service;
 
-import com.earmarked.earmark.dto.CreateEarmarkRequest;
+import com.earmarked.earmark.dto.request.CreateEarmarkRequest;
 import com.earmarked.earmark.entity.Earmark;
 import com.earmarked.earmark.exception.EarmarkAlreadyExistsException;
 import com.earmarked.earmark.repository.EarmarkRepository;

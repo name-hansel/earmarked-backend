@@ -1,4 +1,4 @@
-package com.earmarked.earmark.dto;
+package com.earmarked.earmark.dto.response;
 
 import com.earmarked.earmark.dto.spotify.AlbumSummary;
 import com.earmarked.earmark.entity.Earmark;
@@ -8,13 +8,13 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record EarmarkResponse(UUID id, String spotifyAlbumId, String note, Instant createdAt, AlbumSummary album,
-                              LocalDate listenedAt, boolean listened) {
+                              LocalDate listenedAt, boolean listened, Short rating) {
     public static EarmarkResponse from(Earmark earmark) {
         return new EarmarkResponse(earmark.getId(), earmark.getSpotifyAlbumId(), earmark.getNote(),
-                earmark.getCreatedAt(), null, earmark.getListenedAt(), earmark.isListened());
+                earmark.getCreatedAt(), null, earmark.getListenedAt(), earmark.isListened(), earmark.getRating());
     }
 
     public EarmarkResponse withAlbum(AlbumSummary album) {
-        return new EarmarkResponse(id, spotifyAlbumId, note, createdAt, album, listenedAt, listened);
+        return new EarmarkResponse(id, spotifyAlbumId, note, createdAt, album, listenedAt, listened, rating);
     }
 }
