@@ -16,7 +16,9 @@ public enum EarmarkSortOption {
             Sort.Order.desc("listenedAt").nullsLast())),
     LISTENED_ASC(Sort.by(
             Sort.Order.desc("listened"),
-            Sort.Order.asc("listenedAt").nullsLast()));
+            Sort.Order.asc("listenedAt").nullsLast())),
+    RATING_DESC(Sort.by(Sort.Order.desc("rating").nullsLast())),
+    RATING_ASC(Sort.by(Sort.Order.asc("rating").nullsLast()));
 
     private final Sort sort;
 
