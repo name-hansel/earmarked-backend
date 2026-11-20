@@ -27,18 +27,14 @@ public interface EarmarkRepository extends JpaRepository<Earmark, UUID> {
               AND (lower(e.albumName) LIKE :pattern ESCAPE '\\'
                 OR lower(e.albumArtists) LIKE :pattern ESCAPE '\\'
                 OR lower(e.note) LIKE :pattern ESCAPE '\\')
-              AND (:listened IS NULL
-                OR (:listened = TRUE AND e.listenedAt IS NOT NULL)
-                OR (:listened = FALSE AND e.listenedAt IS NULL))
+              AND (:listened IS NULL OR e.listened = :listened)
               AND (:hasNote IS NULL
                 OR (:hasNote = TRUE AND e.note IS NOT NULL AND e.note <> '')
                 OR (:hasNote = FALSE AND (e.note IS NULL or e.note = '')))
+              AND (:ratingValue IS NULL OR e.rating = :ratingValue)
+              AND (:unrated = FALSE OR e.rating IS NULL)
             """)
-    Page<Earmark> search(@Param("userId") UUID userId,
-                         @Param("pattern") String pattern,
-                         @Param("listened") Boolean listened,
-                         @Param("hasNote") Boolean hasNote,
-                         Pageable pageable);
+    Page<Earmark> search(@Param("userId") UUID userId, @Param("pattern") String pattern, @Param("listened") Boolean listened, @Param("hasNote") Boolean hasNote, @Param("ratingValue") Short ratingValue, @Param("unrated") boolean unrated, Pageable pageable);
 
     @Query("""
             SELECT e FROM Earmark e
@@ -47,11 +43,10 @@ public interface EarmarkRepository extends JpaRepository<Earmark, UUID> {
               AND (:hasNote IS NULL
                    OR (:hasNote = TRUE AND e.note IS NOT NULL AND e.note <> '')
                    OR (:hasNote = FALSE AND (e.note IS NULL OR e.note = '')))
+              AND (:ratingValue IS NULL OR e.rating = :ratingValue)
+              AND (:unrated = FALSE OR e.rating IS NULL)
             """)
-    Page<Earmark> findFiltered(@Param("userId") UUID userId,
-                               @Param("listened") Boolean listened,
-                               @Param("hasNote") Boolean hasNote,
-                               Pageable pageable);
+    Page<Earmark> findFiltered(@Param("userId") UUID userId, @Param("listened") Boolean listened, @Param("hasNote") Boolean hasNote, @Param("ratingValue") Short ratingValue, @Param("unrated") boolean unrated, Pageable pageable);
 
     List<Earmark> findByUserIdAndSpotifyAlbumIdIn(UUID userId, List<String> spotifyAlbumIds);
 

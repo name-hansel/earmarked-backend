@@ -1,8 +1,9 @@
 package com.earmarked.earmark.controller;
 
 import com.earmarked.earmark.config.ApiPaths;
-import com.earmarked.earmark.config.EarmarkSortOption;
-import com.earmarked.earmark.config.EarmarkStatus;
+import com.earmarked.earmark.config.enums.EarmarkRating;
+import com.earmarked.earmark.config.enums.EarmarkSortOption;
+import com.earmarked.earmark.config.enums.EarmarkStatus;
 import com.earmarked.earmark.dto.request.CreateEarmarkRequest;
 import com.earmarked.earmark.dto.request.UpdateEarmarkRequest;
 import com.earmarked.earmark.dto.request.UpdateListenedRequest;
@@ -45,9 +46,10 @@ public class EarmarkController {
                                         @RequestParam(defaultValue = "EARMARKED_DESC") EarmarkSortOption sort,
                                         @RequestParam(required = false) @Size(max = 100) String q,
                                         @RequestParam(required = false) EarmarkStatus status,
-                                        @RequestParam(required = false) Boolean hasNote) {
+                                        @RequestParam(required = false) Boolean hasNote,
+                                        @RequestParam(required = false) EarmarkRating rating) {
         Pageable pageable = PageRequest.of(page, size, sort.getSort());
-        return earmarkService.getAll(userId, q, pageable, status, hasNote);
+        return earmarkService.getAll(userId, q, pageable, status, hasNote, rating);
     }
 
     @PatchMapping("/{id}")

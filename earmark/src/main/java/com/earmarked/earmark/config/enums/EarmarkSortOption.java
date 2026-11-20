@@ -1,4 +1,4 @@
-package com.earmarked.earmark.config;
+package com.earmarked.earmark.config.enums;
 
 import lombok.Getter;
 import org.springframework.data.domain.Sort;

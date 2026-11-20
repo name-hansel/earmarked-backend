@@ -1,7 +1,8 @@
 package com.earmarked.earmark.service;
 
-import com.earmarked.earmark.config.EarmarkStatus;
 import com.earmarked.earmark.config.client.SpotifyClient;
+import com.earmarked.earmark.config.enums.EarmarkRating;
+import com.earmarked.earmark.config.enums.EarmarkStatus;
 import com.earmarked.earmark.dto.request.CreateEarmarkRequest;
 import com.earmarked.earmark.dto.request.UpdateEarmarkRequest;
 import com.earmarked.earmark.dto.response.AlbumEarmarkResponse;
@@ -54,11 +55,14 @@ public class EarmarkService {
         }
     }
 
-    public Page<EarmarkResponse> getAll(UUID userId, String q, Pageable pageable, EarmarkStatus status, Boolean hasNote) {
-        Boolean listened = status == null ? null : status == EarmarkStatus.LISTENED;
+    public Page<EarmarkResponse> getAll(UUID userId, String q, Pageable pageable, EarmarkStatus status, Boolean hasNote, EarmarkRating rating) {
+        Boolean listened = status != null ? status == EarmarkStatus.LISTENED : null;
+        Short ratingValue = rating != null ? rating.getValue() : null;
+        boolean unrated = rating == EarmarkRating.NO_RATING;
+
         Page<Earmark> earmarks = (q == null || q.isBlank())
-                ? repository.findFiltered(userId, listened, hasNote, pageable)
-                : repository.search(userId, toLikePattern(q), listened, hasNote, pageable);
+                ? repository.findFiltered(userId, listened, hasNote, ratingValue, unrated, pageable)
+                : repository.search(userId, toLikePattern(q), listened, hasNote, ratingValue, unrated, pageable);
 
         Page<EarmarkResponse> page = earmarks.map(EarmarkResponse::from);
         Map<String, AlbumSummary> albumMetadata = fetchAlbumMetadata(page.getContent());
