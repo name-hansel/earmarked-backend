@@ -47,9 +47,10 @@ public class EarmarkController {
                                         @RequestParam(required = false) @Size(max = 100) String q,
                                         @RequestParam(required = false) EarmarkStatus status,
                                         @RequestParam(required = false) Boolean hasNote,
+                                        @RequestParam(required = false) Boolean hasReview,
                                         @RequestParam(required = false) EarmarkRating rating) {
         Pageable pageable = PageRequest.of(page, size, sort.getSort());
-        return earmarkService.getAll(userId, q, pageable, status, hasNote, rating);
+        return earmarkService.getAll(userId, q, pageable, status, hasNote, rating, hasReview);
     }
 
     @PatchMapping("/{id}")

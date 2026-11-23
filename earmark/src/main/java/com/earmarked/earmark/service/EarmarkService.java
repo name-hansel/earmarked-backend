@@ -56,14 +56,16 @@ public class EarmarkService {
         }
     }
 
-    public Page<EarmarkResponse> getAll(UUID userId, String q, Pageable pageable, EarmarkStatus status, Boolean hasNote, EarmarkRating rating) {
+    // TODO: Replace EarmarkStatus by Boolean?
+    public Page<EarmarkResponse> getAll(UUID userId, String q, Pageable pageable, EarmarkStatus status, Boolean hasNote, EarmarkRating rating, Boolean hasReview) {
         Boolean listened = status != null ? status == EarmarkStatus.LISTENED : null;
         Short ratingValue = rating != null ? rating.getValue() : null;
         boolean unrated = rating == EarmarkRating.NO_RATING;
 
         Page<EarmarkEntity> earmarks = (q == null || q.isBlank())
-                ? repository.findFiltered(userId, listened, hasNote, ratingValue, unrated, pageable)
-                : repository.search(userId, toLikePattern(q), listened, hasNote, ratingValue, unrated, pageable);
+                ? repository.findFiltered(userId, listened, hasNote, ratingValue, unrated, hasReview, pageable)
+                : repository.search(userId, toLikePattern(q), listened, hasNote, ratingValue, unrated, hasReview,
+                pageable);
 
         Page<EarmarkResponse> page = earmarks.map(EarmarkResponse::from);
         Map<String, AlbumSummary> albumMetadata = fetchAlbumMetadata(page.getContent());
