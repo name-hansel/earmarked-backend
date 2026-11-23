@@ -8,7 +8,7 @@ import com.earmarked.earmark.dto.request.UpdateEarmarkRequest;
 import com.earmarked.earmark.dto.response.AlbumEarmarkResponse;
 import com.earmarked.earmark.dto.response.EarmarkResponse;
 import com.earmarked.earmark.dto.spotify.AlbumSummary;
-import com.earmarked.earmark.entity.Earmark;
+import com.earmarked.earmark.entity.EarmarkEntity;
 import com.earmarked.earmark.exception.EarmarkAlreadyExistsException;
 import com.earmarked.earmark.exception.EarmarkNotFoundException;
 import com.earmarked.earmark.exception.InvalidListenedDateException;
@@ -45,7 +45,8 @@ public class EarmarkService {
         AlbumSummary album = spotifyClient.getAlbum(request.spotifyAlbumId());
 
         try {
-            Earmark saved = writer.save(userId, request, album.name(), toReleaseDate(album), getAlbumArtists(album));
+            EarmarkEntity saved = writer.save(userId, request, album.name(), toReleaseDate(album),
+                    getAlbumArtists(album));
             return EarmarkResponse.from(saved);
         } catch (DataIntegrityViolationException e) {
             if (isAlreadyEarmarked(e)) {
@@ -60,7 +61,7 @@ public class EarmarkService {
         Short ratingValue = rating != null ? rating.getValue() : null;
         boolean unrated = rating == EarmarkRating.NO_RATING;
 
-        Page<Earmark> earmarks = (q == null || q.isBlank())
+        Page<EarmarkEntity> earmarks = (q == null || q.isBlank())
                 ? repository.findFiltered(userId, listened, hasNote, ratingValue, unrated, pageable)
                 : repository.search(userId, toLikePattern(q), listened, hasNote, ratingValue, unrated, pageable);
 
@@ -72,21 +73,23 @@ public class EarmarkService {
 
     @Transactional
     public EarmarkResponse update(UUID userId, UUID id, UpdateEarmarkRequest request) {
-        Earmark earmark = repository.findByIdAndUserId(id, userId).orElseThrow(EarmarkNotFoundException::new);
+        EarmarkEntity earmarkEntity = repository.findByIdAndUserId(id, userId)
+                .orElseThrow(EarmarkNotFoundException::new);
 
-        if (!request.listened() && (request.listenedAt() != null || request.rating() != null)) {
+        if (!request.listened() && (request.listenedAt() != null || request.rating() != null || request.review() != null)) {
             throw new InvalidListenedStateException();
         }
 
         validateListenedAt(request.listenedAt());
 
         String note = request.note() == null || request.note().isBlank() ? null : request.note().trim();
-        earmark.setNote(note);
-        earmark.setListened(request.listened());
-        earmark.setListenedAt(request.listenedAt());
-        earmark.setRating(request.rating());
+        earmarkEntity.setNote(note);
+        earmarkEntity.setListened(request.listened());
+        earmarkEntity.setListenedAt(request.listenedAt());
+        earmarkEntity.setRating(request.rating());
+        earmarkEntity.setReview(request.review());
 
-        return EarmarkResponse.from(earmark);
+        return EarmarkResponse.from(earmarkEntity);
     }
 
     @Transactional
@@ -98,7 +101,7 @@ public class EarmarkService {
 
     @Transactional(readOnly = true)
     public AlbumEarmarkResponse findForAlbum(UUID userId, String spotifyAlbumId) {
-        Optional<Earmark> earmark = repository.findByUserIdAndSpotifyAlbumId(userId, spotifyAlbumId);
+        Optional<EarmarkEntity> earmark = repository.findByUserIdAndSpotifyAlbumId(userId, spotifyAlbumId);
 
         return new AlbumEarmarkResponse(earmark.map(EarmarkResponse::from).orElse(null));
     }
@@ -106,20 +109,22 @@ public class EarmarkService {
     @Transactional(readOnly = true)
     public Map<String, EarmarkResponse> findForAlbums(UUID userId, List<String> spotifyAlbumIds) {
         return repository.findByUserIdAndSpotifyAlbumIdIn(userId, spotifyAlbumIds).stream()
-                .collect(Collectors.toMap(Earmark::getSpotifyAlbumId, EarmarkResponse::from));
+                .collect(Collectors.toMap(EarmarkEntity::getSpotifyAlbumId, EarmarkResponse::from));
     }
 
     @Transactional
     public EarmarkResponse updateListened(UUID userId, UUID id, boolean listened) {
-        Earmark earmark = repository.findByIdAndUserId(id, userId).orElseThrow(EarmarkNotFoundException::new);
+        EarmarkEntity earmarkEntity = repository.findByIdAndUserId(id, userId)
+                .orElseThrow(EarmarkNotFoundException::new);
 
-        earmark.setListened(listened);
+        earmarkEntity.setListened(listened);
         if (!listened) {
-            earmark.setListenedAt(null);
-            earmark.setRating(null);
+            earmarkEntity.setListenedAt(null);
+            earmarkEntity.setRating(null);
+            earmarkEntity.setReview(null);
         }
 
-        return EarmarkResponse.from(earmark);
+        return EarmarkResponse.from(earmarkEntity);
     }
 
     @Transactional
@@ -133,7 +138,7 @@ public class EarmarkService {
         return cause instanceof SQLException sql
                 && "23505".equals(sql.getSQLState())
                 && cause.getMessage() != null
-                && cause.getMessage().contains(Earmark.UQ_USER_ALBUM);
+                && cause.getMessage().contains(EarmarkEntity.UQ_USER_ALBUM);
     }
 
     private Map<String, AlbumSummary> fetchAlbumMetadata(List<EarmarkResponse> earmarks) {

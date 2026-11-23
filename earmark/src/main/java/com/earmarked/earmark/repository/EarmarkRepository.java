@@ -1,6 +1,6 @@
 package com.earmarked.earmark.repository;
 
-import com.earmarked.earmark.entity.Earmark;
+import com.earmarked.earmark.entity.EarmarkEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,17 +12,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface EarmarkRepository extends JpaRepository<Earmark, UUID> {
+public interface EarmarkRepository extends JpaRepository<EarmarkEntity, UUID> {
     boolean existsByUserIdAndSpotifyAlbumId(UUID userId, String spotifyAlbumId);
 
     long deleteByIdAndUserId(UUID id, UUID userId);
 
-    Optional<Earmark> findByUserIdAndSpotifyAlbumId(UUID userId, String spotifyAlbumId);
+    Optional<EarmarkEntity> findByUserIdAndSpotifyAlbumId(UUID userId, String spotifyAlbumId);
 
-    Optional<Earmark> findByIdAndUserId(UUID id, UUID userId);
+    Optional<EarmarkEntity> findByIdAndUserId(UUID id, UUID userId);
 
     @Query("""
-            SELECT e FROM Earmark e
+            SELECT e FROM EarmarkEntity e
             WHERE e.userId = :userId
               AND (lower(e.albumName) LIKE :pattern ESCAPE '\\'
                 OR lower(e.albumArtists) LIKE :pattern ESCAPE '\\'
@@ -34,10 +34,10 @@ public interface EarmarkRepository extends JpaRepository<Earmark, UUID> {
               AND (:ratingValue IS NULL OR e.rating = :ratingValue)
               AND (:unrated = FALSE OR e.rating IS NULL)
             """)
-    Page<Earmark> search(@Param("userId") UUID userId, @Param("pattern") String pattern, @Param("listened") Boolean listened, @Param("hasNote") Boolean hasNote, @Param("ratingValue") Short ratingValue, @Param("unrated") boolean unrated, Pageable pageable);
+    Page<EarmarkEntity> search(@Param("userId") UUID userId, @Param("pattern") String pattern, @Param("listened") Boolean listened, @Param("hasNote") Boolean hasNote, @Param("ratingValue") Short ratingValue, @Param("unrated") boolean unrated, Pageable pageable);
 
     @Query("""
-            SELECT e FROM Earmark e
+            SELECT e FROM EarmarkEntity e
             WHERE e.userId = :userId
               AND (:listened IS null OR e.listened = :listened)
               AND (:hasNote IS NULL
@@ -46,11 +46,11 @@ public interface EarmarkRepository extends JpaRepository<Earmark, UUID> {
               AND (:ratingValue IS NULL OR e.rating = :ratingValue)
               AND (:unrated = FALSE OR e.rating IS NULL)
             """)
-    Page<Earmark> findFiltered(@Param("userId") UUID userId, @Param("listened") Boolean listened, @Param("hasNote") Boolean hasNote, @Param("ratingValue") Short ratingValue, @Param("unrated") boolean unrated, Pageable pageable);
+    Page<EarmarkEntity> findFiltered(@Param("userId") UUID userId, @Param("listened") Boolean listened, @Param("hasNote") Boolean hasNote, @Param("ratingValue") Short ratingValue, @Param("unrated") boolean unrated, Pageable pageable);
 
-    List<Earmark> findByUserIdAndSpotifyAlbumIdIn(UUID userId, List<String> spotifyAlbumIds);
+    List<EarmarkEntity> findByUserIdAndSpotifyAlbumIdIn(UUID userId, List<String> spotifyAlbumIds);
 
     @Modifying
-    @Query("delete from Earmark e where e.userId = :userId")
+    @Query("delete from EarmarkEntity e where e.userId = :userId")
     int deleteAllByUserId(@Param("userId") UUID userId);
 }

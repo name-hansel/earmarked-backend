@@ -14,14 +14,14 @@ import java.util.UUID;
 @Table(
         name = "earmark",
         uniqueConstraints = @UniqueConstraint(
-                name = Earmark.UQ_USER_ALBUM,
+                name = EarmarkEntity.UQ_USER_ALBUM,
                 columnNames = {"user_id", "spotify_album_id"}
         )
 )
 @Getter
 @Setter
 @NoArgsConstructor
-public class Earmark {
+public class EarmarkEntity {
     public static final String UQ_USER_ALBUM = "uq_earmark_user_album";
 
     @Id
@@ -58,4 +58,7 @@ public class Earmark {
 
     @Column
     private Short rating;
+
+    @Column(length = 256)
+    private String review;
 }

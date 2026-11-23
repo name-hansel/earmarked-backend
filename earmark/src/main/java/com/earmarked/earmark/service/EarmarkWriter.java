@@ -1,7 +1,7 @@
 package com.earmarked.earmark.service;
 
 import com.earmarked.earmark.dto.request.CreateEarmarkRequest;
-import com.earmarked.earmark.entity.Earmark;
+import com.earmarked.earmark.entity.EarmarkEntity;
 import com.earmarked.earmark.exception.EarmarkAlreadyExistsException;
 import com.earmarked.earmark.repository.EarmarkRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,19 +18,20 @@ public class EarmarkWriter {
     private final EarmarkRepository repository;
 
     @Transactional
-    Earmark save(UUID userId, CreateEarmarkRequest request, String albumName, LocalDate albumReleaseDate, String albumArtists) {
+    EarmarkEntity save(UUID userId, CreateEarmarkRequest request, String albumName, LocalDate albumReleaseDate, String albumArtists) {
         if (repository.existsByUserIdAndSpotifyAlbumId(userId, request.spotifyAlbumId())) {
             throw new EarmarkAlreadyExistsException();
         }
 
-        Earmark earmark = new Earmark();
-        earmark.setUserId(userId);
-        earmark.setSpotifyAlbumId(request.spotifyAlbumId());
-        earmark.setNote(request.note());
-        earmark.setAlbumName(albumName);
-        earmark.setAlbumReleaseDate(albumReleaseDate);
-        earmark.setAlbumArtists(albumArtists);
+        EarmarkEntity earmarkEntity = new EarmarkEntity();
+        earmarkEntity.setUserId(userId);
+        earmarkEntity.setSpotifyAlbumId(request.spotifyAlbumId());
+        earmarkEntity.setNote(request.note());
+        
+        earmarkEntity.setAlbumName(albumName);
+        earmarkEntity.setAlbumReleaseDate(albumReleaseDate);
+        earmarkEntity.setAlbumArtists(albumArtists);
 
-        return repository.save(earmark);
+        return repository.save(earmarkEntity);
     }
 }
