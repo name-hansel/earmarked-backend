@@ -42,22 +42,25 @@ public class SpotifyService {
     }
 
     private AlbumSummary toSummary(SpotifyAlbumData album) {
-        return new AlbumSummary(album.id(), album.name(), getArtists(album),
-                getImages(album.images()), album.releaseDate(), album.releaseDatePrecision(),
-                album.albumType(), getSpotifyUrl(album));
+        return new AlbumSummary(album.id(), album.name(), getArtists(album), getImages(album.images()),
+                album.releaseDate(), album.releaseDatePrecision(), album.albumType(), null, getSpotifyUrl(album));
     }
 
     private AlbumDetails toDetails(SpotifyAlbumFull album) {
-        List<TrackDetails> tracks = (album.tracks() == null || album.tracks().items() == null)
-                ? List.of()
-                : album.tracks().items().stream()
-                .filter(Objects::nonNull)
-                .map(this::getTrackDetails)
-                .toList();
+        List<SpotifyTrack> items = (album.tracks() == null || album.tracks()
+                .items() == null) ? List.of() : album.tracks().items().stream().filter(Objects::nonNull).toList();
 
-        return new AlbumDetails(album.id(), album.name(), getArtists(album),
-                getImages(album.images()), album.releaseDate(), album.releaseDatePrecision(),
-                album.totalTracks(), album.albumType(), tracks, getSpotifyUrl(album));
+        List<TrackDetails> tracks = items.stream().map(this::getTrackDetails).toList();
+
+        long totalDurationMs = items.stream().map(SpotifyTrack::durationMs).filter(Objects::nonNull)
+                .mapToLong(Long::longValue)
+                .sum();
+
+
+        return new AlbumDetails(album.id(), album.name(), getArtists(album), getImages(album.images()),
+                album.releaseDate(), album.releaseDatePrecision(), album.totalTracks(),
+                totalDurationMs > 0 ? totalDurationMs : null, album.albumType(), tracks,
+                getSpotifyUrl(album));
     }
 
     private TrackDetails getTrackDetails(SpotifyTrack track) {
