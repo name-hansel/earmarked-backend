@@ -56,7 +56,6 @@ public class EarmarkService {
         }
     }
 
-    // TODO: Replace EarmarkStatus by Boolean?
     public Page<EarmarkResponse> getAll(UUID userId, String q, Pageable pageable, EarmarkStatus status, Boolean hasNote, EarmarkRating rating, Boolean hasReview) {
         Boolean listened = status != null ? status == EarmarkStatus.LISTENED : null;
         Short ratingValue = rating != null ? rating.getValue() : null;
