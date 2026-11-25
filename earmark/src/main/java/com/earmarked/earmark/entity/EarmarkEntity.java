@@ -59,6 +59,6 @@ public class EarmarkEntity {
     @Column
     private Short rating;
 
-    @Column(length = 256)
+    @Column(length = 1000)
     private String review;
 }
