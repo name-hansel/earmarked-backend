@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Entity
 @Table(
-        name = "earmark",
+        name = "earmarks",
         uniqueConstraints = @UniqueConstraint(
                 name = EarmarkEntity.UQ_USER_ALBUM,
                 columnNames = {"user_id", "spotify_album_id"}
