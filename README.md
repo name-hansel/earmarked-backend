@@ -3,8 +3,8 @@
 ## Overview
 
 Java (Spring Boot) microservices backend for earmarked, an app for earmarking albums to listen to. Users search Spotify,
-earmark albums (optionally with a note), mark them as listened, and sort, search and filter their list. All traffic from
-the browser goes through a gateway that handles cookie-based JWT auth.
+earmark albums (optionally with a note), mark them as listened, rate and review what they've listened to, and sort,
+search and filter their list. All traffic from the browser goes through a gateway that handles cookie-based JWT auth.
 
 ## Architecture
 
@@ -13,7 +13,7 @@ the browser goes through a gateway that handles cookie-based JWT auth.
 | Gateway (8080)         | Single entry point. Translates HttpOnly cookies to `Authorization` / refresh headers and back, CORS, routing via Eureka (`lb://`) |
 | Auth service (8081)    | Registration, activation, login, refresh, logout, password flows, account deletion                                                |
 | Spotify service (8082) | Album search, album details, batch lookup. Spotify token handling and caching (Redis)                                             |
-| Earmark service (8083) | User-owned earmarks: CRUD, sorting, search, filters, listened state                                                               |
+| Earmark service (8083) | User-owned earmarks: CRUD, sorting, search, filters, listened state, ratings and reviews                                          |
 | Eureka server (8761)   | Service discovery                                                                                                                 |
 
 Services call each other with OpenFeign. Account deletion is propagated asynchronously: the auth service publishes a
@@ -36,7 +36,11 @@ Services call each other with OpenFeign. Account deletion is propagated asynchro
 - Spotify album search and detail pages (batch metadata lookup for lists)
 - Earmark albums with an optional note; one earmark per user per album
 - Listened state with an optional listened date
-- Server-side sorting with pagination
+- Rating (0–3 notes) and a written review, available once an album is listened to
+- Album duration, from the Spotify track lengths
+- Server-side sorting (earmarked date, album name, release date, listened date, rating) with pagination
+- Search across album, artist and note text
+- Filters for status, note, rating and review
 - Weekly cleanup of expired refresh tokens
 
 ## Authentication Flow
@@ -57,7 +61,9 @@ Services call each other with OpenFeign. Account deletion is propagated asynchro
 - Deployment
 - JWKS endpoint and key rotation instead of a static public key
 - Tags for earmarks
-- Leave ratings and reviews for an earmark after listening
+- A "listening" state between to listen and listened
+- Notification service (Kafka-based) for sending emails
+- Rate limiting at the gateway
 - Social feed for earmark-related activities
 
 ## Attribution
