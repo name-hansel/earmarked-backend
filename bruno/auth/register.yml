@@ -8,15 +8,12 @@ http:
   url: "{{api_url}}/api/auth/register"
   body:
     type: json
-    data: "{\r
-
-      \    \"email\": \"snehal@gmail.com\",\r
-
-      \    \"username\": \"hansel\",\r
-
-      \    \"password\": \"password\"\r
-
-      }"
+    data: |-
+      {
+          "email": "test@earmarked.local",
+          "username": "testuser",
+          "password": "password"
+      }
   auth: inherit
 
 settings:
